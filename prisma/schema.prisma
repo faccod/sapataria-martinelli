@@ -1,0 +1,237 @@
+// Sapataria Martinelli — Schema do banco
+// Cobre todas as fases (0 a 3). Cada migration no futuro só adiciona campo, nunca mexe em tabela existente.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================
+// AUTENTICAÇÃO
+// ============================================
+model AdminUser {
+  id        String   @id @default(cuid())
+  user      String   @unique
+  hash      String
+  createdAt DateTime @default(now())
+}
+
+// ============================================
+// BLOG
+// ============================================
+model CategoriaPost {
+  id        String   @id @default(cuid())
+  nome      String   @unique
+  slug      String   @unique
+  cor       String   @default("#a8794a") // hex
+  posts     Post[]
+  createdAt DateTime @default(now())
+}
+
+model Post {
+  id          String   @id @default(cuid())
+  slug        String   @unique
+  titulo      String
+  resumo      String
+  conteudo    String   // markdown
+  capa        String?  // caminho da imagem em /public/uploads
+  publicado   Boolean  @default(false)
+  destaque    Boolean  @default(false)
+  categoriaId String
+  categoria   CategoriaPost @relation(fields: [categoriaId], references: [id])
+  publicadoEm DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([publicado, publicadoEm])
+}
+
+// ============================================
+// CONFIGURAÇÕES DA EMPRESA
+// ============================================
+model Config {
+  id        String   @id @default(cuid())
+  chave     String   @unique
+  valor     String
+  updatedAt DateTime @updatedAt
+}
+
+// ============================================
+// CLIENTES
+// ============================================
+model Cliente {
+  id        String   @id @default(cuid())
+  nome      String
+  telefone  String?
+  whatsapp  String?
+  email     String?
+  endereco  String?
+  observacoes String?
+  ordens    OS[]
+  vendas    Venda[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([nome])
+  @@index([telefone])
+}
+
+// ============================================
+// ORDEM DE SERVIÇO
+// ============================================
+model OS {
+  id              String   @id @default(cuid())
+  numero          Int      @unique // OS-001, OS-002...
+  dataEntrada     DateTime @default(now())
+  dataPrevista    DateTime?
+  dataEntrega     DateTime?
+
+  status          String   @default("RECEBIDO")
+  // RECEBIDO, EM_ANALISE, AGUARDANDO_APROVACAO, EM_EXECUCAO, CONCLUIDO, ENTREGUE, CANCELADO
+
+  funcionario     String?  // diarista / responsável — em aberto
+  clienteId       String
+  cliente         Cliente  @relation(fields: [clienteId], references: [id])
+
+  valorTotal      Float    @default(0)
+  valorEntrada    Float    @default(0)
+  valorSaldo      Float    @default(0)
+  formaPagamento  String?  // DINHEIRO, PIX, CARTAO, OUTROS
+
+  observacoes     String?
+  termo           String?  // termos / observações impressas
+
+  itens           ItemOS[]
+  fotos           FotoOS[]
+  statusLogs      StatusLog[]
+  pagamentos      Pagamento[]
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([status])
+  @@index([dataEntrada])
+}
+
+model ItemOS {
+  id          String  @id @default(cuid())
+  osId        String
+  os          OS      @relation(fields: [osId], references: [id], onDelete: Cascade)
+  tipoItem    String  // sapato, bolsa, carteira, jaqueta, mala, mochila, bota, outro
+  marca       String?
+  cor         String?
+  descricao   String
+  servico     String  // tipo de serviço prestado
+  valor       Float
+}
+
+model FotoOS {
+  id        String   @id @default(cuid())
+  osId      String
+  os        OS       @relation(fields: [osId], references: [id], onDelete: Cascade)
+  url       String
+  tipo      String   // ANTES, DEPOIS
+  createdAt DateTime @default(now())
+}
+
+model StatusLog {
+  id        String   @id @default(cuid())
+  osId      String
+  os        OS       @relation(fields: [osId], references: [id], onDelete: Cascade)
+  status    String
+  nota      String?
+  createdAt DateTime @default(now())
+}
+
+model Pagamento {
+  id        String   @id @default(cuid())
+  osId      String
+  os        OS       @relation(fields: [osId], references: [id], onDelete: Cascade)
+  tipo      String   // SINAL, PARCIAL, FINAL
+  valor     Float
+  forma     String   // DINHEIRO, PIX, CARTAO, OUTROS
+  data      DateTime @default(now())
+}
+
+// ============================================
+// FINANCEIRO
+// ============================================
+model Movimento {
+  id          String   @id @default(cuid())
+  tipo        String   // ENTRADA, SAIDA
+  categoria   String   // IMPOSTO, ALUGUEL, LUZ, MATERIAL, VENDA, SERVICO, OUTROS...
+  descricao   String
+  valor       Float
+  data        DateTime @default(now())
+  osId        String?
+  vendaId     String?
+  observacoes String?
+
+  @@index([tipo, data])
+}
+
+// ============================================
+// ESTOQUE
+// ============================================
+model Material {
+  id            String   @id @default(cuid())
+  nome          String   @unique
+  unidade       String   @default("un") // un, m, kg, par
+  quantidade    Float    @default(0)
+  estoqueMin    Float    @default(0)
+  custo         Float    @default(0)
+  fornecedor    String?
+  movimentos    MovimentoEstoque[]
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model MovimentoEstoque {
+  id          String   @id @default(cuid())
+  materialId  String
+  material    Material @relation(fields: [materialId], references: [id], onDelete: Cascade)
+  tipo        String   // ENTRADA, SAIDA
+  quantidade  Float
+  motivo      String?
+  data        DateTime @default(now())
+}
+
+// ============================================
+// VENDAS DE PRODUTOS
+// ============================================
+model Produto {
+  id          String   @id @default(cuid())
+  nome        String
+  descricao   String?
+  precoCusto  Float    @default(0)
+  precoVenda  Float
+  estoque     Int      @default(0)
+  itemVendas  ItemVenda[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Venda {
+  id          String   @id @default(cuid())
+  clienteId   String?
+  cliente     Cliente? @relation(fields: [clienteId], references: [id])
+  total       Float
+  forma       String   // DINHEIRO, PIX, CARTAO, OUTROS
+  data        DateTime @default(now())
+  itens       ItemVenda[]
+  observacoes String?
+}
+
+model ItemVenda {
+  id        String  @id @default(cuid())
+  vendaId   String
+  venda     Venda   @relation(fields: [vendaId], references: [id], onDelete: Cascade)
+  produtoId String
+  produto   Produto @relation(fields: [produtoId], references: [id])
+  quantidade Int
+  precoUnit Float
+}
