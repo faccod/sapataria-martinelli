@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
-import { OsForm } from "../os-form";
+import { OsForm } from "../../../os-form";
 
 export const dynamic = "force-dynamic";
 
