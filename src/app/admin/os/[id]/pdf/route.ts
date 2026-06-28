@@ -86,7 +86,7 @@ export async function GET(_req: Request, { params }: { params: { id: string } })
   page.drawText("Orcamento valido por 7 dias. Garantia de 90 dias sobre o servico executado.", { x: 40, y, size: 7, font, color: cinza });
 
   const bytes = await pdfDoc.save();
-  return new Response(bytes, {
+  return new Response(Buffer.from(bytes), {
     headers: {
       "Content-Type": "application/pdf",
       "Content-Disposition": `inline; filename="OS-${String(os.numero).padStart(3,"0")}.pdf"`,
