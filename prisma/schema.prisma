@@ -2,7 +2,8 @@
 // Cobre todas as fases (0 a 3). Cada migration no futuro só adiciona campo, nunca mexe em tabela existente.
 
 generator client {
-  provider = "prisma-client-js"
+  provider        = "prisma-client-js"
+  previewFeatures = ["driverAdapters"]
 }
 
 datasource db {

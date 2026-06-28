@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { put } from "@vercel/blob";
 import { writeFile, mkdir } from "fs/promises";
 import path from "path";
 import crypto from "crypto";
@@ -24,12 +25,22 @@ export async function POST(req: Request) {
 
   const ext = path.extname(file.name).toLowerCase() || ".jpg";
   const filename = `${crypto.randomBytes(12).toString("hex")}${ext}`;
-  const uploadDir = path.join(process.cwd(), "public", "uploads");
-  const filepath = path.join(uploadDir, filename);
 
+  // Em producao (Vercel) usa Vercel Blob
+  // Em dev salva em public/uploads/ local
+  if (process.env.BLOB_READ_WRITE_TOKEN) {
+    const blob = await put(`uploads/${filename}`, file, {
+      access: "public",
+      addRandomSuffix: false,
+    });
+    return NextResponse.json({ url: blob.url });
+  }
+
+  // Fallback: dev local
+  const uploadDir = path.join(process.cwd(), "public", "uploads");
   await mkdir(uploadDir, { recursive: true });
+  const filepath = path.join(uploadDir, filename);
   const buffer = Buffer.from(await file.arrayBuffer());
   await writeFile(filepath, buffer);
-
   return NextResponse.json({ url: `/uploads/${filename}` });
 }
