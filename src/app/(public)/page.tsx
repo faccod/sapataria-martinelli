@@ -25,15 +25,15 @@ export default async function HomePage() {
         <div className="container relative py-20 md:py-28 grid gap-10 md:grid-cols-2 items-center">
           <div>
             <span className="inline-block text-xs font-semibold tracking-widest uppercase text-ouro-400 border border-ouro-600/40 px-3 py-1 rounded-full mb-6">
-              Santa Maria de JetibÃ¡ / ES
+              Santa Maria de Jetibá / ES
             </span>
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white leading-tight">
               Conserto de sapatos, bolsas e artigos de couro
               <span className="block text-ouro-400 mt-2">com qualidade artesanal.</span>
             </h1>
             <p className="text-lg text-zinc-300 mt-6 max-w-xl">
-              Recupere suas peÃ§as favoritas. Atendemos sapatos, bolsas, jaquetas, mochilas, malas e botas.
-              TambÃ©m fabricamos peÃ§as sob medida em couro.
+              Recupere suas peças favoritas. Atendemos sapatos, bolsas, jaquetas, mochilas, malas e botas.
+              Também fabricamos peças sob medida em couro.
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
               <Button asChild size="lg">
@@ -42,7 +42,7 @@ export default async function HomePage() {
                 </a>
               </Button>
               <Button asChild size="lg" variant="outline">
-                <Link href="/servicos">Ver serviÃ§os</Link>
+                <Link href="/servicos">Ver serviços</Link>
               </Button>
             </div>
           </div>
@@ -55,21 +55,21 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* SERVIÃ‡OS */}
+      {/* SERVIÇOS */}
       <section className="container py-20">
         <div className="text-center mb-12">
           <h2 className="text-3xl md:text-4xl font-bold text-white">O que consertamos</h2>
-          <p className="text-zinc-400 mt-3">Trabalhos especializados em couro e calÃ§ados.</p>
+          <p className="text-zinc-400 mt-3">Trabalhos especializados em couro e calçados.</p>
         </div>
 
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           {[
             { icon: Scissors, titulo: "Sapatos e botas", desc: "Troca de solado, costura, reforma geral." },
-            { icon: Hammer,   titulo: "Bolsas e mochilas", desc: "Reparo de alÃ§as, zÃ­peres, forros e costuras." },
-            { icon: Wrench,   titulo: "Jaquetas de couro", desc: "Ajustes, troca de zÃ­per, restauraÃ§Ã£o." },
-            { icon: Sparkles, titulo: "Malas", desc: "Conserto de rodÃ­zios, alÃ§as e estrutura." },
+            { icon: Hammer,   titulo: "Bolsas e mochilas", desc: "Reparo de alças, zíperes, forros e costuras." },
+            { icon: Wrench,   titulo: "Jaquetas de couro", desc: "Ajustes, troca de zíper, restauração." },
+            { icon: Sparkles, titulo: "Malas", desc: "Conserto de rodízios, alças e estrutura." },
             { icon: Scissors, titulo: "Carteiras e cintos", desc: "Reforma e ajustes finos." },
-            { icon: Sparkles, titulo: "Sob medida", desc: "FabricaÃ§Ã£o artesanal de peÃ§as em couro." },
+            { icon: Sparkles, titulo: "Sob medida", desc: "Fabricação artesanal de peças em couro." },
           ].map((s, i) => (
             <div key={i} className="p-6 rounded-lg border border-zinc-800 bg-zinc-900/40 hover:border-ouro-600/50 hover:bg-zinc-900/70 transition group">
               <s.icon className="h-8 w-8 text-ouro-400 mb-3 group-hover:scale-110 transition" />
@@ -80,7 +80,7 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* ÃšLTIMOS POSTS */}
+      {/* ÚLTIMOS POSTS */}
       {ultimosPosts.length > 0 && (
         <section className="container py-20">
           <div className="flex items-end justify-between mb-10">
@@ -126,9 +126,9 @@ export default async function HomePage() {
       {/* CTA */}
       <section className="bg-gradient-to-r from-zinc-900 via-black to-zinc-900 border-y border-ouro-700/30">
         <div className="container py-16 text-center">
-          <h2 className="text-3xl md:text-4xl font-bold mb-3 text-white">Tem uma peÃ§a precisando de conserto?</h2>
+          <h2 className="text-3xl md:text-4xl font-bold mb-3 text-white">Tem uma peça precisando de conserto?</h2>
           <p className="text-zinc-300 mb-6 max-w-2xl mx-auto">
-            Manda uma foto pelo WhatsApp e a gente jÃ¡ passa um orÃ§amento sem compromisso.
+            Manda uma foto pelo WhatsApp e a gente já passa um orçamento sem compromisso.
           </p>
           <Button asChild size="lg">
             <a href={`https://wa.me/${process.env.NEXT_PUBLIC_SAPATARIA_WHATSAPP ?? "5527997048164"}`} target="_blank" rel="noopener noreferrer">

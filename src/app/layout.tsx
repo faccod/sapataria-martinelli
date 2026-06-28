@@ -1,13 +1,13 @@
-﻿import type { Metadata } from "next";
+import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
   title: {
-    default: "Martinelli Sapataria & AcessÃ³rios â€” Couro artesanal em Santa Maria de JetibÃ¡/ES",
-    template: "%s â€” Martinelli Sapataria",
+    default: "Martinelli Sapataria & Acessórios — Couro artesanal em Santa Maria de Jetibá/ES",
+    template: "%s — Martinelli Sapataria",
   },
   description:
-    "Conserto de sapatos, bolsas, jaquetas, mochilas, malas e botas. FabricaÃ§Ã£o sob medida em couro. Santa Maria de JetibÃ¡/ES.",
+    "Conserto de sapatos, bolsas, jaquetas, mochilas, malas e botas. Fabricação sob medida em couro. Santa Maria de Jetibá/ES.",
   metadataBase: new URL(process.env.NEXT_PUBLIC_SAPATARIA_SITE_URL ?? "http://localhost:3000"),
 };
 

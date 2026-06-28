@@ -1,17 +1,17 @@
-﻿import { Phone, Instagram, MapPin, Clock } from "lucide-react";
+import { Phone, Instagram, MapPin, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export default function ContatoPage() {
   const whatsapp = process.env.NEXT_PUBLIC_SAPATARIA_WHATSAPP ?? "5527997048164";
   const telefone = process.env.NEXT_PUBLIC_SAPATARIA_TELEFONE ?? "+55 27 99704-8164";
-  const endereco = process.env.NEXT_PUBLIC_SAPATARIA_ENDERECO ?? "Rua dos EvangÃ©licos, 453 â€” Santa Maria de JetibÃ¡/ES";
+  const endereco = process.env.NEXT_PUBLIC_SAPATARIA_ENDERECO ?? "Rua dos Evangélicos, 453 — Santa Maria de Jetibá/ES";
   const insta = process.env.NEXT_PUBLIC_SAPATARIA_INSTAGRAM ?? "martinellisapataria";
 
   return (
     <div className="container py-16">
       <div className="max-w-3xl">
         <h1 className="text-4xl md:text-5xl font-bold text-white">Contato</h1>
-        <p className="text-lg text-zinc-300 mt-3">Mande uma mensagem, tire dÃºvidas ou peÃ§a um orÃ§amento.</p>
+        <p className="text-lg text-zinc-300 mt-3">Mande uma mensagem, tire dúvidas ou peça um orçamento.</p>
       </div>
 
       <div className="grid gap-6 md:grid-cols-2 mt-12">
@@ -33,26 +33,26 @@ export default function ContatoPage() {
           <div className="flex items-start gap-3 p-4 border border-zinc-800 bg-zinc-900/40 rounded-lg">
             <MapPin className="h-5 w-5 text-ouro-400 mt-0.5" />
             <div>
-              <div className="font-semibold text-white">EndereÃ§o</div>
+              <div className="font-semibold text-white">Endereço</div>
               <div className="text-sm text-zinc-400">{endereco}</div>
             </div>
           </div>
           <div className="flex items-start gap-3 p-4 border border-zinc-800 bg-zinc-900/40 rounded-lg">
             <Clock className="h-5 w-5 text-ouro-400 mt-0.5" />
             <div>
-              <div className="font-semibold text-white">HorÃ¡rio</div>
-              <div className="text-sm text-zinc-400">A confirmar (definir conforme seu horÃ¡rio real)</div>
+              <div className="font-semibold text-white">Horário</div>
+              <div className="text-sm text-zinc-400">A confirmar (definir conforme seu horário real)</div>
             </div>
           </div>
         </div>
 
         <div className="bg-gradient-to-br from-ouro-600 to-ouro-800 text-black rounded-2xl p-8 flex flex-col justify-between">
           <div>
-            <h2 className="text-2xl font-bold mb-2">OrÃ§amento rÃ¡pido</h2>
-            <p className="text-zinc-900 mb-6">Manda uma foto da peÃ§a pelo WhatsApp e a gente responde com o orÃ§amento em poucas horas.</p>
+            <h2 className="text-2xl font-bold mb-2">Orçamento rápido</h2>
+            <p className="text-zinc-900 mb-6">Manda uma foto da peça pelo WhatsApp e a gente responde com o orçamento em poucas horas.</p>
           </div>
           <Button asChild size="lg" variant="secondary">
-            <a href={`https://wa.me/${whatsapp}?text=OlÃ¡! Gostaria de um orÃ§amento.`} target="_blank" rel="noopener noreferrer">
+            <a href={`https://wa.me/${whatsapp}?text=Olá! Gostaria de um orçamento.`} target="_blank" rel="noopener noreferrer">
               Abrir WhatsApp
             </a>
           </Button>

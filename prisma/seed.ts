@@ -67,13 +67,38 @@ async function main() {
   }
   console.log(`${configs.length} configs OK`);
 
-  // Servicos
+  // Servicos (tambem ficam em Config pra retrocompatibilidade)
   const servicos = ["Costura de solado","Troca de solado","Reforma de calcados","Reparo de bolsas","Reparo de mochilas","Reparo de malas","Reparo de jaquetas","Reparo de carteiras","Reparo de cintos","Fabricacao sob medida","Outros"];
   for (const nome of servicos) {
     const slug = nome.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, "-");
     await prisma.config.upsert({ where: { chave: `servico_${slug}` }, update: { valor: nome }, create: { chave: `servico_${slug}`, valor: nome } });
   }
-  console.log(`${servicos.length} servicos OK`);
+  console.log(`${servicos.length} servicos OK (em Config retrocompat)`);
+
+  // Listas editaveis (SERVICO / TIPO_ITEM / TIPO_PRODUTO)
+  const SERVICOS_LISTA = ["Costura de solado","Troca de solado","Reforma de calcados","Reparo de bolsas","Reparo de mochilas","Reparo de malas","Reparo de jaquetas","Reparo de carteiras","Reparo de cintos","Troca de ziper","Troca de forro","Fabricacao sob medida","Outros"];
+  const TIPOS_ITEM_LISTA = ["Sapato","Bota","Sandalia","Bolsa","Mochila","Mala","Jaqueta","Carteira","Cinto","Outros"];
+  const TIPOS_PRODUTO_LISTA = ["Cinto","Carteira","Bainha","Capa de celular","Bolsa","Creme para couro","Outros"];
+
+  let listasCriadas = 0;
+  const popular = async (tipo: string, lista: string[]) => {
+    let ordem = 0;
+    for (const nome of lista) {
+      ordem++;
+      try {
+        await prisma.lista.upsert({
+          where: { tipo_nome: { tipo, nome } },
+          update: { ativo: true, ordem },
+          create: { tipo, nome, ordem, ativo: true },
+        });
+        listasCriadas++;
+      } catch (e) { /* ja existe, segue */ }
+    }
+  };
+  await popular("SERVICO", SERVICOS_LISTA);
+  await popular("TIPO_ITEM", TIPOS_ITEM_LISTA);
+  await popular("TIPO_PRODUTO", TIPOS_PRODUTO_LISTA);
+  console.log(`${listasCriadas} itens nas listas editaveis`);
 
   // Materiais (seed se nao existir)
   let materiaisCriados = 0;

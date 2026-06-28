@@ -74,7 +74,7 @@ export function PostForm({ categorias, post }: { categorias: Categoria[]; post?:
       <div className="grid gap-6 lg:grid-cols-3">
         <div className="lg:col-span-2 space-y-4">
           <div>
-            <label className="text-sm font-medium text-zinc-300 mb-1 block">TÃ­tulo</label>
+            <label className="text-sm font-medium text-zinc-300 mb-1 block">Título</label>
             <Input value={titulo} onChange={(e) => { setTitulo(e.target.value); if (!post) setSlug(autoSlug(e.target.value)); }} placeholder="Ex: Como consertar o solado de uma bota" required />
           </div>
           <div>
@@ -83,7 +83,7 @@ export function PostForm({ categorias, post }: { categorias: Categoria[]; post?:
           </div>
           <div>
             <div className="flex items-center justify-between mb-1">
-              <label className="text-sm font-medium text-zinc-300">ConteÃºdo (Markdown)</label>
+              <label className="text-sm font-medium text-zinc-300">Conteúdo (Markdown)</label>
               <Button type="button" variant="ghost" size="sm" onClick={() => setPreview(!preview)} className="text-zinc-400 hover:text-ouro-400">
                 {preview ? <><EyeOff className="h-3 w-3 mr-1" /> Editar</> : <><Eye className="h-3 w-3 mr-1" /> Visualizar</>}
               </Button>
@@ -91,7 +91,7 @@ export function PostForm({ categorias, post }: { categorias: Categoria[]; post?:
             {preview ? (
               <div className="prose-couro border border-zinc-800 rounded-md p-4 min-h-[400px] bg-zinc-900/50" dangerouslySetInnerHTML={{ __html: htmlPreview }} />
             ) : (
-              <Textarea value={conteudo} onChange={(e) => setConteudo(e.target.value)} rows={20} placeholder="# TÃ­tulo do post&#10;&#10;Escreva em Markdown." className="font-mono text-sm" />
+              <Textarea value={conteudo} onChange={(e) => setConteudo(e.target.value)} rows={20} placeholder="# Título do post&#10;&#10;Escreva em Markdown." className="font-mono text-sm" />
             )}
           </div>
         </div>

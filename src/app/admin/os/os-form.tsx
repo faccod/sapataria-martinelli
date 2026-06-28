@@ -1,20 +1,20 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useEffect, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { ArrowLeft, Save, Plus, Trash2, Eye } from "lucide-react";
 import Link from "next/link";
-import { TIPOS_ITEM, SERVICOS, FORMAS_PAGAMENTO, STATUS_OS } from "@/lib/constants";
+import { FORMAS_PAGAMENTO, STATUS_OS } from "@/lib/constants";
 import { formatCurrency } from "@/lib/utils";
 
-type Cliente = { id: string; nome: string; telefone?: string; whatsapp?: string };
-type Item = { tipoItem: string; marca: string; cor: string; descricao: string; servico: string; valor: number };
+type Cliente = { id: string; nome: string; telefone?: string | null; whatsapp?: string | null };
+type Item = { tipoItem: string; marca?: string | null; cor?: string | null; descricao: string; servico: string; valor: number };
 type Os = {
   id: string; numero: number; clienteId: string; status: string; dataPrevista: string;
-  funcionario: string; valorEntrada: number; formaPagamento: string; observacoes: string;
+  funcionario?: string | null; valorEntrada: number; formaPagamento?: string | null; observacoes?: string | null;
   itens: Item[];
 };
 
@@ -22,6 +22,19 @@ export function OsForm({ clientes, os }: { clientes: Cliente[]; os?: Os }) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState("");
+
+  const [servicos, setServicos] = useState<string[]>([]);
+  const [tiposItem, setTiposItem] = useState<string[]>([]);
+
+  useEffect(() => {
+    Promise.all([
+      fetch("/admin/api/listas?tipo=SERVICO").then(r => r.json()).then(d => Array.isArray(d) ? d.map((x: any) => x.nome) : []),
+      fetch("/admin/api/listas?tipo=TIPO_ITEM").then(r => r.json()).then(d => Array.isArray(d) ? d.map((x: any) => x.nome) : []),
+    ]).then(([svcs, tipos]) => {
+      setServicos(svcs);
+      setTiposItem(tipos);
+    }).catch(() => {});
+  }, []);
 
   const [clienteId, setClienteId] = useState(os?.clienteId ?? clientes[0]?.id ?? "");
   const [status, setStatus] = useState(os?.status ?? "RECEBIDO");
@@ -135,16 +148,16 @@ export function OsForm({ clientes, os }: { clientes: Cliente[]; os?: Os }) {
                 <div>
                   <label className="text-xs text-zinc-400 mb-1 block">Tipo</label>
                   <select className={selectCls} value={it.tipoItem} onChange={(e) => updateItem(i, "tipoItem", e.target.value)}>
-                    {TIPOS_ITEM.map((t) => <option key={t} value={t}>{t}</option>)}
+                    {(tiposItem.length > 0 ? tiposItem : ["Sapato","Bota","Bolsa"]).map((t) => <option key={t} value={t}>{t}</option>)}
                   </select>
                 </div>
                 <div>
                   <label className="text-xs text-zinc-400 mb-1 block">Marca</label>
-                  <Input value={it.marca} onChange={(e) => updateItem(i, "marca", e.target.value)} />
+                  <Input value={it.marca ?? ""} onChange={(e) => updateItem(i, "marca", e.target.value)} />
                 </div>
                 <div>
                   <label className="text-xs text-zinc-400 mb-1 block">Cor</label>
-                  <Input value={it.cor} onChange={(e) => updateItem(i, "cor", e.target.value)} />
+                  <Input value={it.cor ?? ""} onChange={(e) => updateItem(i, "cor", e.target.value)} />
                 </div>
                 <div>
                   <label className="text-xs text-zinc-400 mb-1 block">Valor (R$)</label>
@@ -155,7 +168,7 @@ export function OsForm({ clientes, os }: { clientes: Cliente[]; os?: Os }) {
                 <div>
                   <label className="text-xs text-zinc-400 mb-1 block">Servico</label>
                   <select className={selectCls} value={it.servico} onChange={(e) => updateItem(i, "servico", e.target.value)}>
-                    {SERVICOS.map((s) => <option key={s} value={s}>{s}</option>)}
+                    {(servicos.length > 0 ? servicos : ["Costura de solado","Outros"]).map((s) => <option key={s} value={s}>{s}</option>)}
                   </select>
                 </div>
                 <div>

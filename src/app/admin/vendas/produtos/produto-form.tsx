@@ -8,7 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { ArrowLeft, Save, Trash2 } from "lucide-react";
 import Link from "next/link";
 
-type Produto = { id?: string; nome: string; descricao?: string; precoCusto: number; precoVenda: number; estoque: number };
+type Produto = { id?: string; nome: string; descricao?: string | null; precoCusto: number; precoVenda: number; estoque: number };
 
 export function ProdutoForm({ produto }: { produto?: Produto }) {
   const router = useRouter();

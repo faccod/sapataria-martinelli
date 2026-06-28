@@ -61,6 +61,22 @@ model Config {
 }
 
 // ============================================
+// LISTAS EDITÁVEIS (servicos, tipos_item, tipos_produto)
+// ============================================
+model Lista {
+  id        String   @id @default(cuid())
+  tipo      String   // SERVICO, TIPO_ITEM, TIPO_PRODUTO
+  nome      String
+  ordem     Int      @default(0)
+  ativo     Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([tipo, nome])
+  @@index([tipo, ativo, ordem])
+}
+
+// ============================================
 // CLIENTES
 // ============================================
 model Cliente {
@@ -205,7 +221,7 @@ model MovimentoEstoque {
 // ============================================
 model Produto {
   id          String   @id @default(cuid())
-  nome        String
+  nome        String   @unique
   descricao   String?
   precoCusto  Float    @default(0)
   precoVenda  Float

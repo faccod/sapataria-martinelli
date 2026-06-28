@@ -67,7 +67,9 @@ export default async function EstoquePage() {
                     <td className="px-4 py-3 text-zinc-300 text-sm">{m.fornecedor ?? "-"}</td>
                     <td className="px-4 py-3 text-right text-zinc-300 text-sm">{m.custo > 0 ? `R$ ${m.custo.toFixed(2)}` : "-"}</td>
                     <td className="px-4 py-3 text-right">
-                      <Button asChild variant="ghost" size="sm" className="text-ouro-400">Ver</Button>
+                      <Button asChild variant="ghost" size="sm" className="text-ouro-400">
+                        <Link href={`/admin/estoque/${m.id}`}>Ver</Link>
+                      </Button>
                     </td>
                   </tr>
                 );

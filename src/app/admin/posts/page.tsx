@@ -56,7 +56,7 @@ export default async function AdminPostsPage() {
       {posts.length === 0 ? (
         <div className="p-12 border-2 border-dashed border-zinc-800 rounded-lg text-center">
           <p className="text-zinc-300 font-semibold mb-2">Nenhum post ainda</p>
-          <p className="text-sm text-zinc-500 mb-6">Crie seu primeiro post pra comeÃ§ar.</p>
+          <p className="text-sm text-zinc-500 mb-6">Crie seu primeiro post pra começar.</p>
           <Button asChild>
             <Link href="/admin/posts/novo"><Plus className="h-4 w-4 mr-2" /> Criar primeiro post</Link>
           </Button>
@@ -67,11 +67,11 @@ export default async function AdminPostsPage() {
             <thead className="bg-zinc-900 border-b border-zinc-800">
               <tr className="text-left text-xs uppercase tracking-wide text-zinc-400">
                 <th className="px-4 py-3 font-semibold">Capa</th>
-                <th className="px-4 py-3 font-semibold">TÃ­tulo</th>
+                <th className="px-4 py-3 font-semibold">Título</th>
                 <th className="px-4 py-3 font-semibold">Categoria</th>
                 <th className="px-4 py-3 font-semibold">Status</th>
                 <th className="px-4 py-3 font-semibold">Data</th>
-                <th className="px-4 py-3 font-semibold text-right">AÃ§Ãµes</th>
+                <th className="px-4 py-3 font-semibold text-right">Ações</th>
               </tr>
             </thead>
             <tbody>

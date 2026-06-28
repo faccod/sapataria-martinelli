@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { ArrowLeft, Save, Trash2, Plus, Minus } from "lucide-react";
 import Link from "next/link";
 
-type Material = { id?: string; nome: string; unidade: string; quantidade: number; estoqueMin: number; custo: number; fornecedor: string };
+type Material = { id?: string; nome: string; unidade: string; quantidade: number; estoqueMin: number; custo: number; fornecedor?: string | null };
 
 export function MaterialForm({ material }: { material?: Material }) {
   const router = useRouter();
@@ -104,7 +104,7 @@ export function MaterialForm({ material }: { material?: Material }) {
         </div>
         <div>
           <label className="text-sm font-medium text-zinc-300 mb-1 block">Fornecedor</label>
-          <Input value={m.fornecedor} onChange={(e) => setM({ ...m, fornecedor: e.target.value })} />
+          <Input value={m.fornecedor ?? ""} onChange={(e) => setM({ ...m, fornecedor: e.target.value })} />
         </div>
         {error && <div className="text-sm text-red-400 bg-red-950/40 border border-red-900 rounded-md p-3">{error}</div>}
         <div className="flex gap-2">

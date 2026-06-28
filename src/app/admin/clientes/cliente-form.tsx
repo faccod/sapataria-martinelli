@@ -9,8 +9,8 @@ import { ArrowLeft, Save } from "lucide-react";
 import Link from "next/link";
 
 type Cliente = {
-  id?: string; nome: string; telefone?: string; whatsapp?: string;
-  email?: string; endereco?: string; observacoes?: string;
+  id?: string; nome: string; telefone?: string | null; whatsapp?: string | null;
+  email?: string | null; endereco?: string | null; observacoes?: string | null;
 };
 
 export function ClienteForm({ cliente }: { cliente?: Cliente }) {
