@@ -8,7 +8,7 @@ export default function ConfigPage() {
   return (
     <div className="max-w-4xl space-y-6">
       <div>
-        <h1 className="text-3xl font-bold text-white mb-1">Configuracoes</h1>
+        <h1 className="text-3xl font-bold text-white mb-1">Configurações</h1>
         <p className="text-zinc-400">Dados da empresa, mensagens e integracoes.</p>
       </div>
 

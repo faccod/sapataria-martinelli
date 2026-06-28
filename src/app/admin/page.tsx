@@ -188,7 +188,7 @@ export default async function AdminDashboardPage() {
       <div className="grid lg:grid-cols-2 gap-6">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle>Ultimas OS</CardTitle>
+            <CardTitle>Últimas OS</CardTitle>
             <Button asChild size="sm" variant="outline">
               <Link href="/admin/os">Ver todas <ArrowRight className="h-3 w-3 ml-1" /></Link>
             </Button>
@@ -235,7 +235,7 @@ export default async function AdminDashboardPage() {
               <Link href="/admin/financeiro/novo"><DollarSign className="h-4 w-4 mr-2" /> Lançamento financeiro</Link>
             </Button>
             <Button asChild className="w-full justify-start" variant="outline">
-              <Link href="/admin/relatorios"><TrendingUp className="h-4 w-4 mr-2" /> Relatorios</Link>
+              <Link href="/admin/relatorios"><TrendingUp className="h-4 w-4 mr-2" /> Relatórios</Link>
             </Button>
           </CardContent>
         </Card>

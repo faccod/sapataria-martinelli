@@ -41,7 +41,7 @@ export default async function RelatoriosPage({ searchParams }: { searchParams: {
 
   return (
     <div>
-      <h1 className="text-3xl font-bold text-white mb-1">Relatorios</h1>
+      <h1 className="text-3xl font-bold text-white mb-1">Relatórios</h1>
       <p className="text-zinc-400 mb-6">Visão geral do período</p>
 
       <form className="flex flex-wrap items-end gap-3 mb-6 p-4 bg-zinc-900/50 border border-zinc-800 rounded-lg">

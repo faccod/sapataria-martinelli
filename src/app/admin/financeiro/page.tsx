@@ -102,7 +102,7 @@ export default async function FinanceiroPage({ searchParams }: { searchParams: {
         </Card>
       )}
 
-      <h2 className="text-xl font-bold text-white mb-4">Lancamentos ({movs.length})</h2>
+      <h2 className="text-xl font-bold text-white mb-4">Lançamentos ({movs.length})</h2>
       {movs.length === 0 ? (
         <div className="p-8 border-2 border-dashed border-zinc-800 rounded-lg text-center text-zinc-500">Nenhum lançamento no período.</div>
       ) : (

@@ -90,7 +90,7 @@ export default function TiposPage() {
   return (
     <div className="max-w-3xl">
       <Button asChild variant="ghost" size="sm" type="button" className="text-zinc-400 hover:text-ouro-400 mb-4">
-        <Link href="/admin/config"><ArrowLeft className="h-4 w-4 mr-1" /> Voltar para Configuracoes</Link>
+        <Link href="/admin/config"><ArrowLeft className="h-4 w-4 mr-1" /> Voltar para Configurações</Link>
       </Button>
 
       <div className="mb-6">

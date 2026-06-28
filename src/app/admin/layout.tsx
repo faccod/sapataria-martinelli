@@ -11,8 +11,8 @@ const menu = [
   { href: "/admin/financeiro",  label: "Financeiro",  icon: DollarSign,      fase: "3" },
   { href: "/admin/estoque",     label: "Estoque",     icon: Package,         fase: "3" },
   { href: "/admin/vendas",      label: "Vendas",      icon: ShoppingCart,    fase: "3" },
-  { href: "/admin/relatorios",  label: "Relatorios",  icon: BarChart3,       fase: "3" },
-  { href: "/admin/config",      label: "Configuracoes", icon: Settings,      fase: "3" },
+  { href: "/admin/relatorios",  label: "Relatórios",     icon: BarChart3,       fase: "3" },
+  { href: "/admin/config",      label: "Configurações",  icon: Settings,        fase: "3" },
 ];
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
