@@ -12,7 +12,7 @@ export async function GET(req: Request) {
     prisma.venda.findMany({ where: { data: { gte: de, lte: ate } }, include: { cliente: true, itens: { include: { produto: true } } } }),
   ]);
 
-  let csv = "Tipo,Numero,Data,Cliente,Status/Forma,Valor,Detalhes\n";
+  let csv = "Tipo,Número,Data,Cliente,Status/Forma,Valor,Detalhes\n";
   for (const o of os) {
     csv += `OS,OS-${String(o.numero).padStart(3,"0")},${o.dataEntrada.toISOString().split("T")[0]},"${o.cliente.nome}",${o.status},${o.valorTotal.toFixed(2)},"${o.itens.map(i => i.tipoItem + " " + i.servico).join("; ")}"\n`;
   }

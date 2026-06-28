@@ -42,7 +42,7 @@ export default async function RelatoriosPage({ searchParams }: { searchParams: {
   return (
     <div>
       <h1 className="text-3xl font-bold text-white mb-1">Relatorios</h1>
-      <p className="text-zinc-400 mb-6">Visao geral do periodo</p>
+      <p className="text-zinc-400 mb-6">Visão geral do período</p>
 
       <form className="flex flex-wrap items-end gap-3 mb-6 p-4 bg-zinc-900/50 border border-zinc-800 rounded-lg">
         <div>
@@ -62,7 +62,7 @@ export default async function RelatoriosPage({ searchParams }: { searchParams: {
       <div className="grid md:grid-cols-2 gap-6">
         <Card>
           <CardHeader>
-            <CardTitle className="flex items-center gap-2"><BarChart3 className="h-5 w-5 text-ouro-400" /> Faturamento do periodo</CardTitle>
+            <CardTitle className="flex items-center gap-2"><BarChart3 className="h-5 w-5 text-ouro-400" /> Faturamento do período</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-3xl font-bold text-ouro-400">{formatCurrency(faturamento._sum.valorTotal ?? 0)}</div>
@@ -75,7 +75,7 @@ export default async function RelatoriosPage({ searchParams }: { searchParams: {
             <CardTitle className="flex items-center gap-2"><Hammer className="h-5 w-5 text-ouro-400" /> OS por status</CardTitle>
           </CardHeader>
           <CardContent>
-            {osPorStatus.length === 0 ? <p className="text-sm text-zinc-500">Nenhuma OS no periodo.</p> : (
+            {osPorStatus.length === 0 ? <p className="text-sm text-zinc-500">Nenhuma OS no período.</p> : (
               <div className="space-y-2">
                 {osPorStatus.map((s) => {
                   const info = statusInfo(s.status);
@@ -96,7 +96,7 @@ export default async function RelatoriosPage({ searchParams }: { searchParams: {
             <CardTitle className="flex items-center gap-2"><Users className="h-5 w-5 text-ouro-400" /> Top clientes (por gasto)</CardTitle>
           </CardHeader>
           <CardContent>
-            {topClientesOrdenados.length === 0 ? <p className="text-sm text-zinc-500">Sem dados no periodo.</p> : (
+            {topClientesOrdenados.length === 0 ? <p className="text-sm text-zinc-500">Sem dados no período.</p> : (
               <div className="space-y-2">
                 {topClientesOrdenados.map((c, i) => (
                   <div key={i} className="flex items-center justify-between p-2 bg-zinc-950 rounded text-sm">
@@ -114,7 +114,7 @@ export default async function RelatoriosPage({ searchParams }: { searchParams: {
             <CardTitle className="flex items-center gap-2"><Wrench className="h-5 w-5 text-ouro-400" /> Servicos mais pedidos</CardTitle>
           </CardHeader>
           <CardContent>
-            {servicosMaisPedidos.length === 0 ? <p className="text-sm text-zinc-500">Sem dados no periodo.</p> : (
+            {servicosMaisPedidos.length === 0 ? <p className="text-sm text-zinc-500">Sem dados no período.</p> : (
               <div className="space-y-2">
                 {servicosMaisPedidos.map((s, i) => (
                   <div key={s.servico} className="flex items-center justify-between text-sm">

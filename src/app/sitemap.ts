@@ -1,11 +1,6 @@
 import type { MetadataRoute } from "next";
 import { prisma } from "@/lib/prisma";
 
-// Forçar geração dinâmica para evitar prerender em build time
-// (Vercel não tem acesso ao Turso durante npm run build)
-export const dynamic = "force-dynamic";
-export const revalidate = 3600;
-
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const siteUrl = process.env.NEXT_PUBLIC_SAPATARIA_SITE_URL ?? "http://localhost:3000";
   const posts = await prisma.post.findMany({

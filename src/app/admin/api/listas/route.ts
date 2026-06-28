@@ -20,7 +20,7 @@ export async function POST(req: Request) {
   if (!isAuthenticated()) return NextResponse.json({ error: "Nao autorizado" }, { status: 401 });
   const body = await req.json();
   const { tipo, nome, ordem } = body;
-  if (!TIPOS_VALIDOS.includes(tipo)) return NextResponse.json({ error: "tipo invalido" }, { status: 400 });
+  if (!TIPOS_VALIDOS.includes(tipo)) return NextResponse.json({ error: "tipo inválido" }, { status: 400 });
   if (!nome || typeof nome !== "string" || !nome.trim()) return NextResponse.json({ error: "nome obrigatorio" }, { status: 400 });
   const ultimo = await prisma.lista.findFirst({ where: { tipo }, orderBy: { ordem: "desc" } });
   const novaOrdem = typeof ordem === "number" ? ordem : (ultimo?.ordem ?? 0) + 1;

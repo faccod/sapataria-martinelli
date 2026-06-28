@@ -104,7 +104,7 @@ export default async function FinanceiroPage({ searchParams }: { searchParams: {
 
       <h2 className="text-xl font-bold text-white mb-4">Lancamentos ({movs.length})</h2>
       {movs.length === 0 ? (
-        <div className="p-8 border-2 border-dashed border-zinc-800 rounded-lg text-center text-zinc-500">Nenhum lancamento no periodo.</div>
+        <div className="p-8 border-2 border-dashed border-zinc-800 rounded-lg text-center text-zinc-500">Nenhum lançamento no período.</div>
       ) : (
         <div className="bg-zinc-900/50 border border-zinc-800 rounded-lg overflow-hidden">
           <table className="w-full">

@@ -177,7 +177,7 @@ export default async function OsDetailPage({ params }: { params: { id: string } 
                   </Button>
                   <Button asChild className="w-full">
                     <a href={linkWaMsg} target="_blank" rel="noopener noreferrer">
-                      <MessageCircle className="h-4 w-4 mr-2" /> Mandar msg de criacao
+                      <MessageCircle className="h-4 w-4 mr-2" /> Mandar msg de criação
                     </a>
                   </Button>
                   {os.status === "CONCLUIDO" && (

@@ -19,7 +19,7 @@ export async function GET(req: Request) {
 export async function POST(req: Request) {
   if (!isAuthenticated()) return NextResponse.json({ error: "Nao autorizado" }, { status: 401 });
   const { tipo, categoria, descricao, valor, data, observacoes } = await req.json();
-  if (!tipo || !categoria || !descricao || !valor) return NextResponse.json({ error: "Campos obrigatorios" }, { status: 400 });
+  if (!tipo || !categoria || !descricao || !valor) return NextResponse.json({ error: "Campos obrigatórios" }, { status: 400 });
   const m = await prisma.movimento.create({ data: { tipo, categoria, descricao, valor: Number(valor), data: data ? new Date(data) : new Date(), observacoes } });
   return NextResponse.json(m);
 }

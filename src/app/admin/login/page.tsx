@@ -31,7 +31,7 @@ function LoginForm() {
     if (res.ok) { router.push(from); router.refresh(); }
     else {
       const data = await res.json().catch(() => ({}));
-      setError(data.error || "Usuario ou senha invalidos.");
+      setError(data.error || "Usuário ou senha inválidos.");
       setLoading(false);
     }
   }
@@ -39,7 +39,7 @@ function LoginForm() {
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div>
-        <label className="text-sm font-medium text-zinc-300 mb-1 block">Usuario</label>
+        <label className="text-sm font-medium text-zinc-300 mb-1 block">Usuário</label>
         <Input value={user} onChange={(e) => setUser(e.target.value)} placeholder="admin" autoComplete="username" required />
       </div>
       <div>
@@ -51,7 +51,7 @@ function LoginForm() {
         {loading ? "Entrando..." : "Entrar"}
       </Button>
       <p className="text-xs text-zinc-500 text-center pt-2">
-        Usuario padrao: <code className="text-ouro-400">admin</code>
+        Usuário padrão: <code className="text-ouro-400">admin</code>
       </p>
     </form>
   );
@@ -66,7 +66,7 @@ export default function LoginPage() {
             <Image src="/logo-site.png" alt="Martinelli" fill className="object-contain" />
           </div>
           <div className="pt-2">
-            <CardTitle className="text-ouro-400">Area administrativa</CardTitle>
+            <CardTitle className="text-ouro-400">Área administrativa</CardTitle>
             <CardDescription>Acesse o painel de gestao</CardDescription>
           </div>
         </CardHeader>

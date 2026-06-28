@@ -38,7 +38,7 @@ export async function GET(_req: Request, { params }: { params: { id: string } })
   y -= 30;
 
   // Titulo OS
-  page.drawText(`Ordem de Servico #${String(os.numero).padStart(3, "0")}`, { x: 40, y, size: 14, font: fontBold, color: preto });
+  page.drawText(`Ordem de Serviço #${String(os.numero).padStart(3, "0")}`, { x: 40, y, size: 14, font: fontBold, color: preto });
   y -= 16;
   page.drawText(`Data de entrada: ${formatDate(os.dataEntrada)}`, { x: 40, y, size: 10, font });
   y -= 12;
@@ -56,8 +56,8 @@ export async function GET(_req: Request, { params }: { params: { id: string } })
   page.drawText("SERVICOS", { x: 40, y, size: 9, font: fontBold, color: ouro }); y -= 12;
   for (const it of os.itens) {
     page.drawText(`${it.tipoItem}${it.marca ? " - " + it.marca : ""}${it.cor ? " (" + it.cor + ")" : ""}`, { x: 40, y, size: 10, font: fontBold }); y -= 12;
-    page.drawText(`Servico: ${it.servico}`, { x: 60, y, size: 9, font }); y -= 11;
-    if (it.descricao) { page.drawText(`Descricao: ${it.descricao}`, { x: 60, y, size: 9, font, color: cinza }); y -= 11; }
+    page.drawText(`Serviço: ${it.servico}`, { x: 60, y, size: 9, font }); y -= 11;
+    if (it.descricao) { page.drawText(`Descrição: ${it.descricao}`, { x: 60, y, size: 9, font, color: cinza }); y -= 11; }
     page.drawText(`Valor: ${formatCurrency(it.valor)}`, { x: 60, y, size: 9, font }); y -= 15;
   }
   y -= 5;

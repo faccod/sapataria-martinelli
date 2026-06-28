@@ -36,7 +36,7 @@ export default async function VendasPage() {
               {produtos.map((p) => (
                 <Link key={p.id} href={`/admin/vendas/produtos/${p.id}`} className="p-3 bg-zinc-950 border border-zinc-800 rounded hover:border-ouro-600/50 transition">
                   <div className="font-semibold text-white">{p.nome}</div>
-                  <div className="text-xs text-zinc-500">{p.descricao ?? "Sem descricao"}</div>
+                  <div className="text-xs text-zinc-500">{p.descricao ?? "Sem descrição"}</div>
                   <div className="mt-2 flex items-center justify-between">
                     <span className="text-ouro-400 font-bold">{formatCurrency(p.precoVenda)}</span>
                     <span className="text-xs text-zinc-400">Estoque: {p.estoque}</span>

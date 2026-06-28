@@ -19,7 +19,7 @@ export async function POST(req: Request) {
   let total = 0;
   for (const it of itens) {
     const p = await prisma.produto.findUnique({ where: { id: it.produtoId } });
-    if (!p) return NextResponse.json({ error: "Produto invalido" }, { status: 400 });
+    if (!p) return NextResponse.json({ error: "Produto inválido" }, { status: 400 });
     if (p.estoque < it.quantidade) return NextResponse.json({ error: `Estoque insuficiente: ${p.nome}` }, { status: 400 });
     total += p.precoVenda * it.quantidade;
   }

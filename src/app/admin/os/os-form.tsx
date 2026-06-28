@@ -166,7 +166,7 @@ export function OsForm({ clientes, os }: { clientes: Cliente[]; os?: Os }) {
               </div>
               <div className="grid md:grid-cols-2 gap-3 mt-3">
                 <div>
-                  <label className="text-xs text-zinc-400 mb-1 block">Servico</label>
+                  <label className="text-xs text-zinc-400 mb-1 block">Serviço</label>
                   <select className={selectCls} value={it.servico} onChange={(e) => updateItem(i, "servico", e.target.value)}>
                     {(servicos.length > 0 ? servicos : ["Costura de solado","Outros"]).map((s) => <option key={s} value={s}>{s}</option>)}
                   </select>

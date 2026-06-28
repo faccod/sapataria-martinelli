@@ -98,7 +98,7 @@ export default function TiposPage() {
           <IconeAba className="h-7 w-7 text-ouro-400" />
           <h1 className="text-3xl font-bold text-white">Listas editaveis</h1>
         </div>
-        <p className="text-zinc-400">Gerencie os servicos e categorias de item/produto do sistema.</p>
+        <p className="text-zinc-400">Gerencie os serviços e categorias de item/produto do sistema.</p>
       </div>
 
       <div className="flex gap-2 mb-6 border-b border-zinc-800">

@@ -46,7 +46,7 @@ export default async function AdminDashboardPage() {
   return (
     <div>
       <h1 className="text-3xl font-bold text-white mb-1">Dashboard</h1>
-      <p className="text-zinc-400 mb-8">Visao geral da Sapataria Martinelli.</p>
+      <p className="text-zinc-400 mb-8">Visão geral da Sapataria Martinelli.</p>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 mb-6">
         <Card>
@@ -232,7 +232,7 @@ export default async function AdminDashboardPage() {
               <Link href="/admin/vendas/nova"><ShoppingCart className="h-4 w-4 mr-2" /> Nova venda</Link>
             </Button>
             <Button asChild className="w-full justify-start" variant="outline">
-              <Link href="/admin/financeiro/novo"><DollarSign className="h-4 w-4 mr-2" /> Lancamento financeiro</Link>
+              <Link href="/admin/financeiro/novo"><DollarSign className="h-4 w-4 mr-2" /> Lançamento financeiro</Link>
             </Button>
             <Button asChild className="w-full justify-start" variant="outline">
               <Link href="/admin/relatorios"><TrendingUp className="h-4 w-4 mr-2" /> Relatorios</Link>

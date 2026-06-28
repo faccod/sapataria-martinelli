@@ -20,7 +20,7 @@ export default async function OsPage({ searchParams }: { searchParams: { status?
     <div>
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-3xl font-bold text-white mb-1">Ordens de Servico</h1>
+          <h1 className="text-3xl font-bold text-white mb-1">Ordens de Serviço</h1>
           <p className="text-zinc-400">{ordens.length} OS no total</p>
         </div>
         <Button asChild>
@@ -56,7 +56,7 @@ export default async function OsPage({ searchParams }: { searchParams: { status?
               <tr className="text-left text-xs uppercase tracking-wide text-zinc-400">
                 <th className="px-4 py-3 font-semibold">OS</th>
                 <th className="px-4 py-3 font-semibold">Cliente</th>
-                <th className="px-4 py-3 font-semibold">Item / Servico</th>
+                <th className="px-4 py-3 font-semibold">Item / Serviço</th>
                 <th className="px-4 py-3 font-semibold">Status</th>
                 <th className="px-4 py-3 font-semibold">Data</th>
                 <th className="px-4 py-3 font-semibold text-right">Valor</th>

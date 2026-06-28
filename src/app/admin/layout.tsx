@@ -7,7 +7,7 @@ const menu = [
   { href: "/admin",             label: "Dashboard",   icon: LayoutDashboard, fase: "0+" },
   { href: "/admin/posts",       label: "Blog / Posts", icon: FileText,        fase: "1" },
   { href: "/admin/clientes",    label: "Clientes",    icon: Users,           fase: "2" },
-  { href: "/admin/os",          label: "Ordens de Servico", icon: Hammer,   fase: "2" },
+  { href: "/admin/os",          label: "Ordens de Serviço", icon: Hammer,   fase: "2" },
   { href: "/admin/financeiro",  label: "Financeiro",  icon: DollarSign,      fase: "3" },
   { href: "/admin/estoque",     label: "Estoque",     icon: Package,         fase: "3" },
   { href: "/admin/vendas",      label: "Vendas",      icon: ShoppingCart,    fase: "3" },
