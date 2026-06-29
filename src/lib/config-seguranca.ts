@@ -1,1 +1,1 @@
-export const ADMIN_HASH = '$2a$10$9RgGee0VAqrbjwAz5./OsefgVUAw3MIlwTkPhHlgCa/etYK1S9UAK';
+export const ADMIN_HASH = '$2a$10$lbFTW8zI4rDih.Twy22qUuQllpPpVMicf1wcsH.TZ0yhpHdaKGWuW';
