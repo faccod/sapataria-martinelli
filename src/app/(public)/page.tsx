@@ -1,11 +1,12 @@
 import Link from "next/link";
 import Image from "next/image";
-import { ArrowRight, Hammer, Scissors, Sparkles, Wrench } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { prisma } from "@/lib/prisma";
 import { formatDate } from "@/lib/utils";
+import { servicos } from "@/lib/servicos";
 
 export const dynamic = "force-dynamic";
 
@@ -63,20 +64,31 @@ export default async function HomePage() {
         </div>
 
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {[
-            { icon: Scissors, titulo: "Sapatos e botas", desc: "Troca de solado, costura, reforma geral." },
-            { icon: Hammer,   titulo: "Bolsas e mochilas", desc: "Reparo de alças, zíperes, forros e costuras." },
-            { icon: Wrench,   titulo: "Jaquetas de couro", desc: "Ajustes, troca de zíper, restauração." },
-            { icon: Sparkles, titulo: "Malas", desc: "Conserto de rodízios, alças e estrutura." },
-            { icon: Scissors, titulo: "Carteiras e cintos", desc: "Reforma e ajustes finos." },
-            { icon: Sparkles, titulo: "Sob medida", desc: "Fabricação artesanal de peças em couro." },
-          ].map((s, i) => (
-            <div key={i} className="p-6 rounded-lg border border-zinc-800 bg-zinc-900/40 hover:border-ouro-600/50 hover:bg-zinc-900/70 transition group">
-              <s.icon className="h-8 w-8 text-ouro-400 mb-3 group-hover:scale-110 transition" />
-              <h3 className="font-semibold text-white">{s.titulo}</h3>
-              <p className="text-sm text-zinc-400 mt-1">{s.desc}</p>
-            </div>
-          ))}
+          {servicos.map((s) => {
+            const Icone = s.icon;
+            return (
+              <Link
+                key={s.slug}
+                href={`/servicos/${s.slug}`}
+                className="group block p-6 rounded-lg border border-zinc-800 bg-zinc-900/40 hover:border-ouro-600/50 hover:bg-zinc-900/70 hover:-translate-y-0.5 transition focus:outline-none focus:ring-2 focus:ring-ouro-500"
+              >
+                <div className="flex items-center justify-between">
+                  <Icone className="h-8 w-8 text-ouro-400 mb-3 transition group-hover:scale-110" />
+                  <ArrowRight className="h-4 w-4 text-ouro-400 opacity-0 -translate-x-2 transition group-hover:opacity-100 group-hover:translate-x-0" />
+                </div>
+                <h3 className="font-semibold text-white">{s.titulo}</h3>
+                <p className="text-sm text-zinc-400 mt-1">{s.descCurta}</p>
+              </Link>
+            );
+          })}
+        </div>
+
+        <div className="text-center mt-10">
+          <Button asChild variant="outline">
+            <Link href="/servicos">
+              Ver todos os serviços <ArrowRight className="ml-2 h-4 w-4" />
+            </Link>
+          </Button>
         </div>
       </section>
 

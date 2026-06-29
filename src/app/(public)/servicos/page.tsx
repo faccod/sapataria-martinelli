@@ -1,14 +1,16 @@
-﻿import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Scissors, Hammer, Wrench, Sparkles, Briefcase, Backpack } from "lucide-react";
+﻿import Link from "next/link";
+import type { Metadata } from "next";
+import { ArrowRight } from "lucide-react";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { servicos } from "@/lib/servicos";
 
-const servicos = [
-  { icon: Scissors,  titulo: "Sapatos",   desc: "Troca de solado, costura lateral, troca de palmilha, restauração geral." },
-  { icon: Wrench,    titulo: "Botas",     desc: "Conserto de cano, troca de zíper, salto, solado e forro." },
-  { icon: Hammer,    titulo: "Bolsas",    desc: "Reparo de alça, troca de zíper, forro novo, costura e restauração." },
-  { icon: Backpack,  titulo: "Mochilas",  desc: "Alça, zíper, reforço de fundo, ajustes e impermeabilização." },
-  { icon: Briefcase, titulo: "Malas",     desc: "Rodízio, alça, zíper, estrutura e forro." },
-  { icon: Sparkles,  titulo: "Sob medida", desc: "Fabricação artesanal de cintos, carteiras, bolsas e peças personalizadas em couro." },
-];
+export const dynamic = "force-dynamic";
+
+export const metadata: Metadata = {
+  title: "Serviços — Sapataria Martinelli",
+  description:
+    "Conserto especializado em sapatos, botas, bolsas, mochilas, malas e fabricação sob medida em couro. Santa Maria de Jetibá/ES.",
+};
 
 export default function ServicosPage() {
   return (
@@ -21,17 +23,29 @@ export default function ServicosPage() {
       </div>
 
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-        {servicos.map((s, i) => (
-          <Card key={i} className="hover:border-ouro-600/60 transition">
-            <CardHeader>
-              <s.icon className="h-8 w-8 text-ouro-400 mb-2" />
-              <CardTitle>{s.titulo}</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <CardDescription>{s.desc}</CardDescription>
-            </CardContent>
-          </Card>
-        ))}
+        {servicos.map((s) => {
+          const Icone = s.icon;
+          return (
+            <Link
+              key={s.slug}
+              href={`/servicos/${s.slug}`}
+              className="group block focus:outline-none focus:ring-2 focus:ring-ouro-500 rounded-xl"
+            >
+              <Card className="h-full hover:border-ouro-600/60 hover:bg-zinc-900/40 hover:-translate-y-0.5 transition">
+                <CardHeader>
+                  <Icone className="h-8 w-8 text-ouro-400 mb-2 transition group-hover:scale-110" />
+                  <CardTitle className="flex items-center justify-between">
+                    <span>{s.titulo}</span>
+                    <ArrowRight className="h-4 w-4 text-ouro-400 opacity-0 -translate-x-2 transition group-hover:opacity-100 group-hover:translate-x-0" />
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <CardDescription>{s.descCurta}</CardDescription>
+                </CardContent>
+              </Card>
+            </Link>
+          );
+        })}
       </div>
     </div>
   );
