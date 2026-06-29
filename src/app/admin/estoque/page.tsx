@@ -40,43 +40,83 @@ export default async function EstoquePage() {
           <Button asChild><Link href="/admin/estoque/novo"><Plus className="h-4 w-4 mr-2" /> Cadastrar material</Link></Button>
         </div>
       ) : (
-        <div className="bg-zinc-900/50 border border-zinc-800 rounded-lg overflow-hidden">
-          <table className="w-full">
-            <thead className="bg-zinc-900 border-b border-zinc-800">
-              <tr className="text-left text-xs uppercase tracking-wide text-zinc-400">
-                <th className="px-4 py-3 font-semibold">Material</th>
-                <th className="px-4 py-3 font-semibold text-center">Estoque</th>
-                <th className="px-4 py-3 font-semibold text-center">Minimo</th>
-                <th className="px-4 py-3 font-semibold">Fornecedor</th>
-                <th className="px-4 py-3 font-semibold text-right">Custo</th>
-                <th className="px-4 py-3 font-semibold text-right">Acoes</th>
-              </tr>
-            </thead>
-            <tbody>
-              {materiais.map((m) => {
-                const baixo = m.estoqueMin > 0 && m.quantidade < m.estoqueMin;
-                return (
-                  <tr key={m.id} className="border-b border-zinc-800/50 last:border-0 hover:bg-zinc-900/50">
-                    <td className="px-4 py-3">
-                      <Link href={`/admin/estoque/${m.id}`} className="font-semibold text-white hover:text-ouro-400">{m.nome}</Link>
-                    </td>
-                    <td className="px-4 py-3 text-center">
-                      <span className={`font-bold ${baixo ? "text-red-400" : "text-ouro-400"}`}>{m.quantidade} {m.unidade}</span>
-                    </td>
-                    <td className="px-4 py-3 text-center text-zinc-400">{m.estoqueMin} {m.unidade}</td>
-                    <td className="px-4 py-3 text-zinc-300 text-sm">{m.fornecedor ?? "-"}</td>
-                    <td className="px-4 py-3 text-right text-zinc-300 text-sm">{m.custo > 0 ? `R$ ${m.custo.toFixed(2)}` : "-"}</td>
-                    <td className="px-4 py-3 text-right">
-                      <Button asChild variant="ghost" size="sm" className="text-ouro-400">
-                        <Link href={`/admin/estoque/${m.id}`}>Ver</Link>
-                      </Button>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
+        <>
+          {/* MOBILE: cards */}
+          <div className="md:hidden space-y-3">
+            {materiais.map((m) => {
+              const baixo = m.estoqueMin > 0 && m.quantidade < m.estoqueMin;
+              return (
+                <div key={`card-${m.id}`} className={`bg-zinc-900/50 border rounded-lg p-3 ${baixo ? "border-amber-600/50" : "border-zinc-800"}`}>
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="min-w-0">
+                      <Link href={`/admin/estoque/${m.id}`} className="font-semibold text-white hover:text-ouro-400 line-clamp-1">{m.nome}</Link>
+                      {m.fornecedor && <div className="text-xs text-zinc-500 line-clamp-1">{m.fornecedor}</div>}
+                    </div>
+                    {baixo && <Badge variant="destructive" className="shrink-0">Baixo</Badge>}
+                  </div>
+                  <div className="grid grid-cols-3 gap-2 mt-3 text-sm">
+                    <div>
+                      <div className="text-xs text-zinc-500">Estoque</div>
+                      <div className={`font-bold ${baixo ? "text-red-400" : "text-ouro-400"}`}>{m.quantidade} {m.unidade}</div>
+                    </div>
+                    <div>
+                      <div className="text-xs text-zinc-500">Mínimo</div>
+                      <div className="text-zinc-300">{m.estoqueMin} {m.unidade}</div>
+                    </div>
+                    <div>
+                      <div className="text-xs text-zinc-500">Custo</div>
+                      <div className="text-zinc-300">{m.custo > 0 ? `R$ ${m.custo.toFixed(2)}` : "-"}</div>
+                    </div>
+                  </div>
+                  <div className="flex items-center justify-end mt-3 pt-3 border-t border-zinc-800">
+                    <Button asChild variant="outline" size="sm" className="text-ouro-400">
+                      <Link href={`/admin/estoque/${m.id}`}>Ver / Editar</Link>
+                    </Button>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          {/* DESKTOP: tabela */}
+          <div className="hidden md:block bg-zinc-900/50 border border-zinc-800 rounded-lg overflow-hidden">
+            <table className="w-full">
+              <thead className="bg-zinc-900 border-b border-zinc-800">
+                <tr className="text-left text-xs uppercase tracking-wide text-zinc-400">
+                  <th className="px-4 py-3 font-semibold">Material</th>
+                  <th className="px-4 py-3 font-semibold text-center">Estoque</th>
+                  <th className="px-4 py-3 font-semibold text-center">Minimo</th>
+                  <th className="px-4 py-3 font-semibold">Fornecedor</th>
+                  <th className="px-4 py-3 font-semibold text-right">Custo</th>
+                  <th className="px-4 py-3 font-semibold text-right">Acoes</th>
+                </tr>
+              </thead>
+              <tbody>
+                {materiais.map((m) => {
+                  const baixo = m.estoqueMin > 0 && m.quantidade < m.estoqueMin;
+                  return (
+                    <tr key={`row-${m.id}`} className="border-b border-zinc-800/50 last:border-0 hover:bg-zinc-900/50">
+                      <td className="px-4 py-3">
+                        <Link href={`/admin/estoque/${m.id}`} className="font-semibold text-white hover:text-ouro-400">{m.nome}</Link>
+                      </td>
+                      <td className="px-4 py-3 text-center">
+                        <span className={`font-bold ${baixo ? "text-red-400" : "text-ouro-400"}`}>{m.quantidade} {m.unidade}</span>
+                      </td>
+                      <td className="px-4 py-3 text-center text-zinc-400">{m.estoqueMin} {m.unidade}</td>
+                      <td className="px-4 py-3 text-zinc-300 text-sm">{m.fornecedor ?? "-"}</td>
+                      <td className="px-4 py-3 text-right text-zinc-300 text-sm">{m.custo > 0 ? `R$ ${m.custo.toFixed(2)}` : "-"}</td>
+                      <td className="px-4 py-3 text-right">
+                        <Button asChild variant="ghost" size="sm" className="text-ouro-400">
+                          <Link href={`/admin/estoque/${m.id}`}>Ver</Link>
+                        </Button>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        </>
       )}
     </div>
   );

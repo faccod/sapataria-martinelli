@@ -106,30 +106,52 @@ export default async function FinanceiroPage({ searchParams }: { searchParams: {
       {movs.length === 0 ? (
         <div className="p-8 border-2 border-dashed border-zinc-800 rounded-lg text-center text-zinc-500">Nenhum lançamento no período.</div>
       ) : (
-        <div className="bg-zinc-900/50 border border-zinc-800 rounded-lg overflow-hidden">
-          <table className="w-full">
-            <thead className="bg-zinc-900 border-b border-zinc-800">
-              <tr className="text-left text-xs uppercase tracking-wide text-zinc-400">
-                <th className="px-4 py-3 font-semibold">Data</th>
-                <th className="px-4 py-3 font-semibold">Tipo</th>
-                <th className="px-4 py-3 font-semibold">Categoria</th>
-                <th className="px-4 py-3 font-semibold">Descricao</th>
-                <th className="px-4 py-3 font-semibold text-right">Valor</th>
-              </tr>
-            </thead>
-            <tbody>
-              {movs.map((m) => (
-                <tr key={m.id} className="border-b border-zinc-800/50 last:border-0">
-                  <td className="px-4 py-3 text-zinc-400 text-sm">{formatDate(m.data)}</td>
-                  <td className="px-4 py-3"><span className={`px-2 py-0.5 rounded text-xs font-semibold ${m.tipo === "ENTRADA" ? "bg-emerald-600/20 text-emerald-400" : "bg-red-600/20 text-red-400"}`}>{m.tipo}</span></td>
-                  <td className="px-4 py-3 text-zinc-300 text-sm">{m.categoria}</td>
-                  <td className="px-4 py-3 text-zinc-300 text-sm">{m.descricao}</td>
-                  <td className={`px-4 py-3 text-right font-bold ${m.tipo === "ENTRADA" ? "text-emerald-400" : "text-red-400"}`}>{m.tipo === "ENTRADA" ? "+" : "-"}{formatCurrency(m.valor)}</td>
+        <>
+          {/* MOBILE: cards */}
+          <div className="md:hidden space-y-2">
+            {movs.map((m) => (
+              <div key={`card-${m.id}`} className="bg-zinc-900/50 border border-zinc-800 rounded-lg p-3">
+                <div className="flex items-start justify-between gap-2">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className={`px-2 py-0.5 rounded text-xs font-semibold ${m.tipo === "ENTRADA" ? "bg-emerald-600/20 text-emerald-400" : "bg-red-600/20 text-red-400"}`}>{m.tipo}</span>
+                    <span className="text-xs text-zinc-500">{formatDate(m.data)}</span>
+                  </div>
+                  <span className={`font-bold text-lg shrink-0 ${m.tipo === "ENTRADA" ? "text-emerald-400" : "text-red-400"}`}>
+                    {m.tipo === "ENTRADA" ? "+" : "-"}{formatCurrency(m.valor)}
+                  </span>
+                </div>
+                <div className="text-xs text-zinc-400 mt-1">{m.categoria}</div>
+                {m.descricao && <div className="text-sm text-zinc-300 mt-1 line-clamp-2">{m.descricao}</div>}
+              </div>
+            ))}
+          </div>
+
+          {/* DESKTOP: tabela */}
+          <div className="hidden md:block bg-zinc-900/50 border border-zinc-800 rounded-lg overflow-hidden">
+            <table className="w-full">
+              <thead className="bg-zinc-900 border-b border-zinc-800">
+                <tr className="text-left text-xs uppercase tracking-wide text-zinc-400">
+                  <th className="px-4 py-3 font-semibold">Data</th>
+                  <th className="px-4 py-3 font-semibold">Tipo</th>
+                  <th className="px-4 py-3 font-semibold">Categoria</th>
+                  <th className="px-4 py-3 font-semibold">Descricao</th>
+                  <th className="px-4 py-3 font-semibold text-right">Valor</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody>
+                {movs.map((m) => (
+                  <tr key={`row-${m.id}`} className="border-b border-zinc-800/50 last:border-0">
+                    <td className="px-4 py-3 text-zinc-400 text-sm">{formatDate(m.data)}</td>
+                    <td className="px-4 py-3"><span className={`px-2 py-0.5 rounded text-xs font-semibold ${m.tipo === "ENTRADA" ? "bg-emerald-600/20 text-emerald-400" : "bg-red-600/20 text-red-400"}`}>{m.tipo}</span></td>
+                    <td className="px-4 py-3 text-zinc-300 text-sm">{m.categoria}</td>
+                    <td className="px-4 py-3 text-zinc-300 text-sm">{m.descricao}</td>
+                    <td className={`px-4 py-3 text-right font-bold ${m.tipo === "ENTRADA" ? "text-emerald-400" : "text-red-400"}`}>{m.tipo === "ENTRADA" ? "+" : "-"}{formatCurrency(m.valor)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </>
       )}
     </div>
   );

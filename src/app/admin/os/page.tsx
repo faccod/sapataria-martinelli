@@ -50,44 +50,71 @@ export default async function OsPage({ searchParams }: { searchParams: { status?
           <Button asChild><Link href="/admin/os/novo"><Plus className="h-4 w-4 mr-2" /> Criar OS</Link></Button>
         </div>
       ) : (
-        <div className="bg-zinc-900/50 border border-zinc-800 rounded-lg overflow-hidden">
-          <table className="w-full">
-            <thead className="bg-zinc-900 border-b border-zinc-800">
-              <tr className="text-left text-xs uppercase tracking-wide text-zinc-400">
-                <th className="px-4 py-3 font-semibold">OS</th>
-                <th className="px-4 py-3 font-semibold">Cliente</th>
-                <th className="px-4 py-3 font-semibold">Item / Serviço</th>
-                <th className="px-4 py-3 font-semibold">Status</th>
-                <th className="px-4 py-3 font-semibold">Data</th>
-                <th className="px-4 py-3 font-semibold text-right">Valor</th>
-                <th className="px-4 py-3 font-semibold text-right">Acoes</th>
-              </tr>
-            </thead>
-            <tbody>
-              {ordens.map((os) => {
-                const s = statusInfo(os.status);
-                return (
-                  <tr key={os.id} className="border-b border-zinc-800/50 last:border-0 hover:bg-zinc-900/50">
-                    <td className="px-4 py-3 font-bold text-ouro-400">OS-{String(os.numero).padStart(3, "0")}</td>
-                    <td className="px-4 py-3"><Link href={`/admin/clientes/${os.clienteId}`} className="text-white hover:text-ouro-400 font-semibold">{os.cliente.nome}</Link></td>
-                    <td className="px-4 py-3 text-sm text-zinc-300">
-                      {os.itens[0] ? `${os.itens[0].tipoItem} - ${os.itens[0].servico}` : "-"}
-                      {os.itens.length > 1 && <span className="text-xs text-zinc-500"> +{os.itens.length - 1}</span>}
-                    </td>
-                    <td className="px-4 py-3"><span className={`inline-block px-2 py-0.5 rounded text-xs font-semibold text-white ${s.cor}`}>{s.label}</span></td>
-                    <td className="px-4 py-3 text-sm text-zinc-400">{formatDate(os.dataEntrada)}</td>
-                    <td className="px-4 py-3 text-right font-bold text-ouro-400">{formatCurrency(os.valorTotal)}</td>
-                    <td className="px-4 py-3 text-right">
-                      <Button asChild variant="ghost" size="icon" className="text-zinc-400 hover:text-ouro-400">
-                        <Link href={`/admin/os/${os.id}`}><Eye className="h-4 w-4" /></Link>
-                      </Button>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
+        <>
+          {/* MOBILE: cards */}
+          <div className="md:hidden space-y-3">
+            {ordens.map((os) => {
+              const s = statusInfo(os.status);
+              return (
+                <Link key={`card-${os.id}`} href={`/admin/os/${os.id}`} className="block bg-zinc-900/50 border border-zinc-800 rounded-lg p-3 hover:border-ouro-600/50 transition">
+                  <div className="flex items-start justify-between gap-2 mb-2">
+                    <span className="font-bold text-ouro-400">OS-{String(os.numero).padStart(3, "0")}</span>
+                    <span className={`inline-block px-2 py-0.5 rounded text-xs font-semibold text-white shrink-0 ${s.cor}`}>{s.label}</span>
+                  </div>
+                  <div className="font-semibold text-white mb-1 line-clamp-1">{os.cliente.nome}</div>
+                  <div className="text-sm text-zinc-300 mb-2 line-clamp-2">
+                    {os.itens[0] ? `${os.itens[0].tipoItem} - ${os.itens[0].servico}` : "-"}
+                    {os.itens.length > 1 && <span className="text-xs text-zinc-500"> +{os.itens.length - 1} mais</span>}
+                  </div>
+                  <div className="flex items-center justify-between text-sm pt-2 border-t border-zinc-800">
+                    <span className="text-xs text-zinc-500">{formatDate(os.dataEntrada)}</span>
+                    <span className="font-bold text-ouro-400">{formatCurrency(os.valorTotal)}</span>
+                  </div>
+                </Link>
+              );
+            })}
+          </div>
+
+          {/* DESKTOP: tabela */}
+          <div className="hidden md:block bg-zinc-900/50 border border-zinc-800 rounded-lg overflow-hidden">
+            <table className="w-full">
+              <thead className="bg-zinc-900 border-b border-zinc-800">
+                <tr className="text-left text-xs uppercase tracking-wide text-zinc-400">
+                  <th className="px-4 py-3 font-semibold">OS</th>
+                  <th className="px-4 py-3 font-semibold">Cliente</th>
+                  <th className="px-4 py-3 font-semibold">Item / Serviço</th>
+                  <th className="px-4 py-3 font-semibold">Status</th>
+                  <th className="px-4 py-3 font-semibold">Data</th>
+                  <th className="px-4 py-3 font-semibold text-right">Valor</th>
+                  <th className="px-4 py-3 font-semibold text-right">Acoes</th>
+                </tr>
+              </thead>
+              <tbody>
+                {ordens.map((os) => {
+                  const s = statusInfo(os.status);
+                  return (
+                    <tr key={`row-${os.id}`} className="border-b border-zinc-800/50 last:border-0 hover:bg-zinc-900/50">
+                      <td className="px-4 py-3 font-bold text-ouro-400">OS-{String(os.numero).padStart(3, "0")}</td>
+                      <td className="px-4 py-3"><Link href={`/admin/clientes/${os.clienteId}`} className="text-white hover:text-ouro-400 font-semibold">{os.cliente.nome}</Link></td>
+                      <td className="px-4 py-3 text-sm text-zinc-300">
+                        {os.itens[0] ? `${os.itens[0].tipoItem} - ${os.itens[0].servico}` : "-"}
+                        {os.itens.length > 1 && <span className="text-xs text-zinc-500"> +{os.itens.length - 1}</span>}
+                      </td>
+                      <td className="px-4 py-3"><span className={`inline-block px-2 py-0.5 rounded text-xs font-semibold text-white ${s.cor}`}>{s.label}</span></td>
+                      <td className="px-4 py-3 text-sm text-zinc-400">{formatDate(os.dataEntrada)}</td>
+                      <td className="px-4 py-3 text-right font-bold text-ouro-400">{formatCurrency(os.valorTotal)}</td>
+                      <td className="px-4 py-3 text-right">
+                        <Button asChild variant="ghost" size="icon" className="text-zinc-400 hover:text-ouro-400">
+                          <Link href={`/admin/os/${os.id}`}><Eye className="h-4 w-4" /></Link>
+                        </Button>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        </>
       )}
     </div>
   );
