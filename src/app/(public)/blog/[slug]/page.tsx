@@ -1,5 +1,4 @@
 import { notFound } from "next/navigation";
-import Image from "next/image";
 import Link from "next/link";
 import type { Metadata } from "next";
 import { marked } from "marked";
@@ -7,6 +6,7 @@ import { prisma } from "@/lib/prisma";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { formatDate } from "@/lib/utils";
+import { CapaInterativa } from "@/components/capa-interativa";
 import { ArrowLeft, Share2, Calendar } from "lucide-react";
 
 export const dynamic = "force-dynamic";
@@ -61,8 +61,8 @@ export default async function PostPage({ params }: { params: { slug: string } })
       </header>
 
       {post.capa && (
-        <div className="relative aspect-[16/9] rounded-2xl overflow-hidden mb-10 bg-zinc-800 border border-zinc-800">
-          <Image src={post.capa} alt={post.titulo} fill className="object-cover" priority />
+        <div className="mb-10">
+          <CapaInterativa src={post.capa} alt={post.titulo} />
         </div>
       )}
 
