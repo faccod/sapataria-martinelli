@@ -125,12 +125,12 @@ export async function GET(_req: Request, { params }: { params: { id: string } })
   }
 
   // 1ª VIA — topo da folha
-  drawVia(PAGE_H - 30, "1ª VIA - CLIENTE", "Assinatura do cliente");
+  drawVia(PAGE_H - 30, "1A VIA - CLIENTE", "Assinatura do cliente");
 
   // Linha de corte (pontilhada) no meio
   const cutY = PAGE_H / 2;
-  page.drawText("✂  CORTAR AQUI", {
-    x: PAGE_W / 2 - 35, y: cutY + 2, size: 8, font: fontBold, color: cinza,
+  page.drawText("- - - - - - - -  CORTAR AQUI  - - - - - - - -", {
+    x: PAGE_W / 2 - 130, y: cutY + 2, size: 8, font: fontBold, color: cinza,
   });
   for (let x = MARGIN_X; x < PAGE_W - MARGIN_X; x += 6) {
     page.drawLine({ start: { x, y: cutY - 10 }, end: { x: x + 3, y: cutY - 10 }, thickness: 0.5, color: cinzaClaro });
@@ -138,7 +138,7 @@ export async function GET(_req: Request, { params }: { params: { id: string } })
   }
 
   // 2ª VIA — base da folha
-  drawVia(cutY - 30, "2ª VIA - LOJA", "Assinatura do responsavel (loja)");
+  drawVia(cutY - 30, "2A VIA - LOJA", "Assinatura do responsavel (loja)");
 
   const bytes = await pdfDoc.save();
   return new Response(Buffer.from(bytes), {
