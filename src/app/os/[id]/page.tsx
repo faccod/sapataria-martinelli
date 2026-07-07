@@ -54,20 +54,43 @@ export default async function OsPublicaPage({ params }: { params: { id: string }
             </CardContent>
           </Card>
 
-          {os.fotos.length > 0 && (
-            <Card>
-              <CardContent className="p-6">
-                <h2 className="font-bold text-white mb-3">Fotos</h2>
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
-                  {os.fotos.map((f) => (
-                    <a key={f.id} href={f.url} target="_blank" rel="noopener noreferrer" className="block aspect-square bg-zinc-800 rounded overflow-hidden">
-                      <img src={f.url} alt={f.tipo} className="w-full h-full object-cover" />
-                    </a>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          )}
+          {os.fotos.length > 0 && (() => {
+            const antes = os.fotos.filter((f) => f.tipo === "ANTES");
+            const depois = os.fotos.filter((f) => f.tipo === "DEPOIS");
+            const renderGaleria = (lista: typeof os.fotos) => (
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+                {lista.map((f) => (
+                  <a key={f.id} href={f.url} target="_blank" rel="noopener noreferrer" className="block aspect-square bg-zinc-800 rounded overflow-hidden border border-zinc-800 hover:border-ouro-600/50 transition">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={f.url} alt={f.tipo} className="w-full h-full object-cover" />
+                  </a>
+                ))}
+              </div>
+            );
+            return (
+              <Card>
+                <CardContent className="p-6">
+                  <h2 className="font-bold text-white mb-3">Fotos</h2>
+                  {antes.length > 0 && (
+                    <div className="mb-4">
+                      <div className="text-xs uppercase tracking-wider text-zinc-400 mb-2">
+                        Antes <span className="text-ouro-400">({antes.length})</span>
+                      </div>
+                      {renderGaleria(antes)}
+                    </div>
+                  )}
+                  {depois.length > 0 && (
+                    <div>
+                      <div className="text-xs uppercase tracking-wider text-zinc-400 mb-2">
+                        Depois <span className="text-ouro-400">({depois.length})</span>
+                      </div>
+                      {renderGaleria(depois)}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            );
+          })()}
 
           <p className="text-center text-xs text-zinc-500">
             Esta pagina e atualizada sempre que o status da sua OS muda.

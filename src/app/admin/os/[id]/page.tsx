@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { statusInfo, whatsappLink, buildMensagemOS } from "@/lib/constants";
 import { formatCurrency, formatDate } from "@/lib/utils";
+import { FotoUpload } from "@/components/foto-upload";
 import { MessageCircle, Printer, ArrowLeft, Phone, MapPin, User, Hammer, Calendar, QrCode } from "lucide-react";
 
 export const dynamic = "force-dynamic";
@@ -120,20 +121,12 @@ export default async function OsDetailPage({ params }: { params: { id: string } 
             </CardContent>
           </Card>
 
-          {os.fotos.length > 0 && (
-            <Card>
-              <CardHeader><CardTitle>Fotos ({os.fotos.length})</CardTitle></CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-3 gap-2">
-                  {os.fotos.map((f) => (
-                    <a key={f.id} href={f.url} target="_blank" rel="noopener noreferrer" className="block aspect-square bg-zinc-800 rounded overflow-hidden border border-zinc-800 hover:border-ouro-600/50">
-                      <img src={f.url} alt={f.tipo} className="w-full h-full object-cover" />
-                    </a>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          )}
+          <Card>
+            <CardHeader><CardTitle>Fotos ({os.fotos.length})</CardTitle></CardHeader>
+            <CardContent>
+              <FotoUpload osId={os.id} fotos={os.fotos} />
+            </CardContent>
+          </Card>
 
           {os.statusLogs.length > 0 && (
             <Card>
