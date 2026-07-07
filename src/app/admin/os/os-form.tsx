@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { ArrowLeft, Save, Plus, Trash2, Eye } from "lucide-react";
+import { ArrowLeft, Save, Plus, Trash2, Check, X, Loader2 } from "lucide-react";
 import Link from "next/link";
 import { FORMAS_PAGAMENTO, STATUS_OS } from "@/lib/constants";
 import { formatCurrency } from "@/lib/utils";
@@ -23,8 +23,12 @@ export function OsForm({ clientes, os }: { clientes: Cliente[]; os?: Os }) {
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState("");
 
+  // Listas dinâmicas (tipo de item + serviço) — vinham da API
   const [servicos, setServicos] = useState<string[]>([]);
   const [tiposItem, setTiposItem] = useState<string[]>([]);
+
+  // Lista local de clientes (pra incluir novos cadastrados inline)
+  const [clientesLocal, setClientesLocal] = useState<Cliente[]>(clientes);
 
   useEffect(() => {
     Promise.all([
@@ -46,6 +50,97 @@ export function OsForm({ clientes, os }: { clientes: Cliente[]; os?: Os }) {
   const [itens, setItens] = useState<Item[]>(os?.itens ?? [
     { tipoItem: "Sapato", marca: "", cor: "", descricao: "", servico: "Costura de solado", valor: 0 }
   ]);
+
+  // ===== Inline-add: Cliente (topo) =====
+  const [addClienteOpen, setAddClienteOpen] = useState(false);
+  const [newClienteNome, setNewClienteNome] = useState("");
+  const [newClienteTel, setNewClienteTel] = useState("");
+  const [savingCliente, setSavingCliente] = useState(false);
+
+  async function saveNewCliente() {
+    if (!newClienteNome.trim()) return;
+    setSavingCliente(true);
+    try {
+      const r = await fetch("/admin/api/clientes", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ nome: newClienteNome.trim(), telefone: newClienteTel.trim() || null }),
+      });
+      if (!r.ok) {
+        const j = await r.json().catch(() => ({}));
+        alert(j.error || "Erro ao criar cliente");
+        return;
+      }
+      const c = await r.json();
+      setClientesLocal((prev) =>
+        [...prev, c].sort((a, b) => a.nome.localeCompare(b.nome)),
+      );
+      setClienteId(c.id);
+      setAddClienteOpen(false);
+      setNewClienteNome("");
+      setNewClienteTel("");
+    } finally {
+      setSavingCliente(false);
+    }
+  }
+
+  // ===== Inline-add: Tipo do item =====
+  const [addTipoIdx, setAddTipoIdx] = useState<number | null>(null);
+  const [newTipoNome, setNewTipoNome] = useState("");
+  const [savingTipo, setSavingTipo] = useState(false);
+
+  async function saveNewTipo(forIndex: number) {
+    if (!newTipoNome.trim()) return;
+    setSavingTipo(true);
+    try {
+      const r = await fetch("/admin/api/listas", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ tipo: "TIPO_ITEM", nome: newTipoNome.trim() }),
+      });
+      if (!r.ok) {
+        const j = await r.json().catch(() => ({}));
+        alert(j.error || "Erro ao criar tipo");
+        return;
+      }
+      const c = await r.json();
+      setTiposItem((prev) => (prev.includes(c.nome) ? prev : [...prev, c.nome]));
+      updateItem(forIndex, "tipoItem", c.nome);
+      setAddTipoIdx(null);
+      setNewTipoNome("");
+    } finally {
+      setSavingTipo(false);
+    }
+  }
+
+  // ===== Inline-add: Serviço do item =====
+  const [addServicoIdx, setAddServicoIdx] = useState<number | null>(null);
+  const [newServicoNome, setNewServicoNome] = useState("");
+  const [savingServico, setSavingServico] = useState(false);
+
+  async function saveNewServico(forIndex: number) {
+    if (!newServicoNome.trim()) return;
+    setSavingServico(true);
+    try {
+      const r = await fetch("/admin/api/listas", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ tipo: "SERVICO", nome: newServicoNome.trim() }),
+      });
+      if (!r.ok) {
+        const j = await r.json().catch(() => ({}));
+        alert(j.error || "Erro ao criar serviço");
+        return;
+      }
+      const c = await r.json();
+      setServicos((prev) => (prev.includes(c.nome) ? prev : [...prev, c.nome]));
+      updateItem(forIndex, "servico", c.nome);
+      setAddServicoIdx(null);
+      setNewServicoNome("");
+    } finally {
+      setSavingServico(false);
+    }
+  }
 
   const valorTotal = itens.reduce((s, i) => s + (Number(i.valor) || 0), 0);
   const saldo = valorTotal - (Number(valorEntrada) || 0);
@@ -90,7 +185,8 @@ export function OsForm({ clientes, os }: { clientes: Cliente[]; os?: Os }) {
     router.refresh();
   }
 
-  const selectCls = "w-full h-10 rounded-md border border-zinc-700 bg-zinc-900 px-3 text-sm text-zinc-100";
+  const selectCls = "h-10 rounded-md border border-zinc-700 bg-zinc-900 px-3 text-sm text-zinc-100";
+  const inputCls = "h-10 rounded-md border border-zinc-700 bg-zinc-900 px-3 text-sm text-zinc-100";
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6 max-w-5xl">
@@ -99,22 +195,65 @@ export function OsForm({ clientes, os }: { clientes: Cliente[]; os?: Os }) {
       </Button>
 
       <div className="grid md:grid-cols-2 gap-4">
+        {/* CLIENTE */}
         <div>
           <label className="text-sm font-medium text-zinc-300 mb-1 block">Cliente *</label>
-          <select className={selectCls} value={clienteId} onChange={(e) => setClienteId(e.target.value)} required>
-            <option value="">Selecione um cliente</option>
-            {clientes.map((c) => <option key={c.id} value={c.id}>{c.nome}</option>)}
-          </select>
-          {clientes.length === 0 && (
-            <p className="text-xs text-amber-400 mt-1">Cadastre um cliente primeiro em /admin/clientes/novo</p>
+          {!addClienteOpen ? (
+            <div className="flex gap-1">
+              <select className={`${selectCls} flex-1`} value={clienteId} onChange={(e) => setClienteId(e.target.value)} required>
+                <option value="">Selecione um cliente</option>
+                {clientesLocal.map((c) => <option key={c.id} value={c.id}>{c.nome}</option>)}
+              </select>
+              <Button type="button" size="icon" variant="outline" onClick={() => setAddClienteOpen(true)} title="Cadastrar novo cliente">
+                <Plus className="h-4 w-4" />
+              </Button>
+            </div>
+          ) : (
+            <div className="space-y-2 p-3 bg-zinc-950 border border-zinc-800 rounded-lg">
+              <Input
+                autoFocus
+                value={newClienteNome}
+                onChange={(e) => setNewClienteNome(e.target.value)}
+                placeholder="Nome do cliente *"
+                className={inputCls}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") { e.preventDefault(); saveNewCliente(); }
+                  if (e.key === "Escape") { setAddClienteOpen(false); setNewClienteNome(""); setNewClienteTel(""); }
+                }}
+              />
+              <Input
+                value={newClienteTel}
+                onChange={(e) => setNewClienteTel(e.target.value)}
+                placeholder="Telefone (opcional)"
+                className={inputCls}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") { e.preventDefault(); saveNewCliente(); }
+                }}
+              />
+              <div className="flex gap-2">
+                <Button type="button" size="sm" onClick={saveNewCliente} disabled={savingCliente || !newClienteNome.trim()}>
+                  {savingCliente ? <Loader2 className="h-3 w-3 animate-spin" /> : <Check className="h-3 w-3" />}
+                  <span className="ml-1">Salvar</span>
+                </Button>
+                <Button type="button" size="sm" variant="ghost" onClick={() => { setAddClienteOpen(false); setNewClienteNome(""); setNewClienteTel(""); }}>
+                  <X className="h-3 w-3" /> Cancelar
+                </Button>
+              </div>
+            </div>
+          )}
+          {clientesLocal.length === 0 && !addClienteOpen && (
+            <p className="text-xs text-amber-400 mt-1">Nenhum cliente. Clique no + pra cadastrar.</p>
           )}
         </div>
+
+        {/* STATUS (fixo, sem +) */}
         <div>
           <label className="text-sm font-medium text-zinc-300 mb-1 block">Status</label>
-          <select className={selectCls} value={status} onChange={(e) => setStatus(e.target.value)}>
+          <select className={`${selectCls} w-full`} value={status} onChange={(e) => setStatus(e.target.value)}>
             {STATUS_OS.map((s) => <option key={s.value} value={s.value}>{s.label}</option>)}
           </select>
         </div>
+
         <div>
           <label className="text-sm font-medium text-zinc-300 mb-1 block">Data prevista de entrega</label>
           <Input type="date" value={dataPrevista} onChange={(e) => setDataPrevista(e.target.value)} />
@@ -145,11 +284,40 @@ export function OsForm({ clientes, os }: { clientes: Cliente[]; os?: Os }) {
                 )}
               </div>
               <div className="grid md:grid-cols-4 gap-3">
+                {/* TIPO */}
                 <div>
                   <label className="text-xs text-zinc-400 mb-1 block">Tipo</label>
-                  <select className={selectCls} value={it.tipoItem} onChange={(e) => updateItem(i, "tipoItem", e.target.value)}>
-                    {(tiposItem.length > 0 ? tiposItem : ["Sapato","Bota","Bolsa"]).map((t) => <option key={t} value={t}>{t}</option>)}
-                  </select>
+                  {addTipoIdx === i ? (
+                    <div className="flex gap-1">
+                      <Input
+                        autoFocus
+                        value={newTipoNome}
+                        onChange={(e) => setNewTipoNome(e.target.value)}
+                        placeholder="Novo tipo..."
+                        className={inputCls}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") { e.preventDefault(); saveNewTipo(i); }
+                          if (e.key === "Escape") { setAddTipoIdx(null); setNewTipoNome(""); }
+                        }}
+                      />
+                      <Button type="button" size="icon" variant="default" onClick={() => saveNewTipo(i)} disabled={savingTipo || !newTipoNome.trim()} title="Salvar">
+                        {savingTipo ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4" />}
+                      </Button>
+                      <Button type="button" size="icon" variant="ghost" onClick={() => { setAddTipoIdx(null); setNewTipoNome(""); }} title="Cancelar">
+                        <X className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  ) : (
+                    <div className="flex gap-1">
+                      <select className={`${selectCls} flex-1`} value={it.tipoItem} onChange={(e) => updateItem(i, "tipoItem", e.target.value)}>
+                        <option value="">Selecione</option>
+                        {(tiposItem.length > 0 ? tiposItem : ["Sapato", "Bota", "Bolsa"]).map((t) => <option key={t} value={t}>{t}</option>)}
+                      </select>
+                      <Button type="button" size="icon" variant="outline" onClick={() => setAddTipoIdx(i)} title="Cadastrar novo tipo">
+                        <Plus className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  )}
                 </div>
                 <div>
                   <label className="text-xs text-zinc-400 mb-1 block">Marca</label>
@@ -165,11 +333,40 @@ export function OsForm({ clientes, os }: { clientes: Cliente[]; os?: Os }) {
                 </div>
               </div>
               <div className="grid md:grid-cols-2 gap-3 mt-3">
+                {/* SERVIÇO */}
                 <div>
                   <label className="text-xs text-zinc-400 mb-1 block">Serviço</label>
-                  <select className={selectCls} value={it.servico} onChange={(e) => updateItem(i, "servico", e.target.value)}>
-                    {(servicos.length > 0 ? servicos : ["Costura de solado","Outros"]).map((s) => <option key={s} value={s}>{s}</option>)}
-                  </select>
+                  {addServicoIdx === i ? (
+                    <div className="flex gap-1">
+                      <Input
+                        autoFocus
+                        value={newServicoNome}
+                        onChange={(e) => setNewServicoNome(e.target.value)}
+                        placeholder="Novo serviço..."
+                        className={inputCls}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") { e.preventDefault(); saveNewServico(i); }
+                          if (e.key === "Escape") { setAddServicoIdx(null); setNewServicoNome(""); }
+                        }}
+                      />
+                      <Button type="button" size="icon" variant="default" onClick={() => saveNewServico(i)} disabled={savingServico || !newServicoNome.trim()} title="Salvar">
+                        {savingServico ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4" />}
+                      </Button>
+                      <Button type="button" size="icon" variant="ghost" onClick={() => { setAddServicoIdx(null); setNewServicoNome(""); }} title="Cancelar">
+                        <X className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  ) : (
+                    <div className="flex gap-1">
+                      <select className={`${selectCls} flex-1`} value={it.servico} onChange={(e) => updateItem(i, "servico", e.target.value)}>
+                        <option value="">Selecione</option>
+                        {(servicos.length > 0 ? servicos : ["Costura de solado", "Outros"]).map((s) => <option key={s} value={s}>{s}</option>)}
+                      </select>
+                      <Button type="button" size="icon" variant="outline" onClick={() => setAddServicoIdx(i)} title="Cadastrar novo serviço">
+                        <Plus className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  )}
                 </div>
                 <div>
                   <label className="text-xs text-zinc-400 mb-1 block">Descricao / Problema</label>
@@ -191,7 +388,7 @@ export function OsForm({ clientes, os }: { clientes: Cliente[]; os?: Os }) {
           </div>
           <div>
             <label className="text-xs text-zinc-400 mb-1 block">Forma de pagamento</label>
-            <select className={selectCls} value={formaPagamento} onChange={(e) => setFormaPagamento(e.target.value)}>
+            <select className={`${selectCls} w-full`} value={formaPagamento} onChange={(e) => setFormaPagamento(e.target.value)}>
               {FORMAS_PAGAMENTO.map((f) => <option key={f} value={f}>{f}</option>)}
             </select>
           </div>
