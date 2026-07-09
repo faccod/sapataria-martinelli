@@ -1,15 +1,35 @@
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { Button } from "@/components/ui/button";
-import { Plus, Eye, Hammer } from "lucide-react";
+import { Plus, Eye, Hammer, Search } from "lucide-react";
 import { statusInfo } from "@/lib/constants";
 import { formatCurrency, formatDate } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
 
-export default async function OsPage({ searchParams }: { searchParams: { status?: string } }) {
+export default async function OsPage({ searchParams }: { searchParams: { status?: string; q?: string } }) {
   const statusFiltro = searchParams.status ?? "TODOS";
-  const where = statusFiltro !== "TODOS" ? { status: statusFiltro } : {};
+  const q = (searchParams.q ?? "").trim();
+  const statusCond = statusFiltro !== "TODOS" ? { status: statusFiltro } : {};
+
+  // busca: numero (se for numerico), nome/telefone/whatsapp do cliente, servico/descricao dos itens
+  let searchCond: any = {};
+  if (q) {
+    const qNum = Number(q);
+    const numeroCond = Number.isFinite(qNum) && qNum > 0 ? [{ numero: qNum }] : [];
+    searchCond = {
+      OR: [
+        ...numeroCond,
+        { cliente: { nome: { contains: q } } },
+        { cliente: { telefone: { contains: q } } },
+        { cliente: { whatsapp: { contains: q } } },
+        { itens: { some: { descricao: { contains: q } } } },
+        { itens: { some: { servico: { contains: q } } } },
+      ],
+    };
+  }
+
+  const where = { ...statusCond, ...searchCond };
   const ordens = await prisma.oS.findMany({
     where,
     orderBy: { createdAt: "desc" },
@@ -32,8 +52,11 @@ export default async function OsPage({ searchParams }: { searchParams: { status?
         {["TODOS","RECEBIDO","EM_ANALISE","AGUARDANDO_APROVACAO","EM_EXECUCAO","CONCLUIDO","ENTREGUE","CANCELADO"].map((s) => {
           const info = statusInfo(s);
           const ativo = statusFiltro === s;
+          const href = q
+            ? (s === "TODOS" ? `/admin/os?q=${encodeURIComponent(q)}` : `/admin/os?status=${s}&q=${encodeURIComponent(q)}`)
+            : (s === "TODOS" ? "/admin/os" : `/admin/os?status=${s}`);
           return (
-            <Link key={s} href={s === "TODOS" ? "/admin/os" : `/admin/os?status=${s}`}>
+            <Link key={s} href={href}>
               <span className={`inline-block px-3 py-1 rounded-full text-xs font-semibold border ${ativo ? "bg-ouro-500 text-black border-ouro-500" : "bg-zinc-900 text-zinc-300 border-zinc-700 hover:border-ouro-600/50"}`}>
                 {s === "TODOS" ? "Todos" : info.label}
               </span>
@@ -41,6 +64,38 @@ export default async function OsPage({ searchParams }: { searchParams: { status?
           );
         })}
       </div>
+
+      {/* BARRA DE BUSCA */}
+      <form method="GET" action="/admin/os" className="flex gap-2 mb-6">
+        {statusFiltro !== "TODOS" && <input type="hidden" name="status" value={statusFiltro} />}
+        <div className="relative flex-1">
+          <Search className="h-4 w-4 absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500" />
+          <input
+            type="text"
+            name="q"
+            defaultValue={q}
+            placeholder="Buscar por numero, cliente, telefone, servico ou item..."
+            className="w-full h-10 pl-10 pr-4 rounded-md border border-zinc-700 bg-zinc-900 text-sm text-zinc-100 placeholder-zinc-500 focus:outline-none focus:border-ouro-600/60"
+          />
+        </div>
+        <Button type="submit">Buscar</Button>
+        {q && (
+          <Link
+            href={statusFiltro !== "TODOS" ? `/admin/os?status=${statusFiltro}` : "/admin/os"}
+            className="inline-flex items-center px-4 h-10 rounded-md border border-zinc-700 bg-zinc-900 text-sm text-zinc-300 hover:bg-zinc-800"
+          >
+            Limpar
+          </Link>
+        )}
+      </form>
+
+      {q && (
+        <div className="mb-4 text-sm text-zinc-400">
+          {ordens.length === 0
+            ? <>Nenhuma OS encontrada para <span className="text-ouro-400">"{q}"</span>.</>
+            : <>{ordens.length} OS(s) encontrada(s) para <span className="text-ouro-400">"{q}"</span>.</>}
+        </div>
+      )}
 
       {ordens.length === 0 ? (
         <div className="p-12 border-2 border-dashed border-zinc-800 rounded-lg text-center">

@@ -3,9 +3,10 @@ import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { statusInfo, whatsappLink, buildMensagemOS } from "@/lib/constants";
+import { statusInfo, whatsappLink, buildMensagemOS, FORMAS_PAGAMENTO } from "@/lib/constants";
 import { formatCurrency, formatDate } from "@/lib/utils";
 import { FotoUpload } from "@/components/foto-upload";
+import { ReceberPagamento } from "@/components/receber-pagamento";
 import { MessageCircle, Printer, ArrowLeft, Phone, MapPin, User, Hammer, Calendar, QrCode } from "lucide-react";
 
 export const dynamic = "force-dynamic";
@@ -155,6 +156,33 @@ export default async function OsDetailPage({ params }: { params: { id: string } 
               <div className={`inline-block px-3 py-1 rounded text-sm font-bold text-white ${s.cor}`}>{s.label}</div>
               {os.dataPrevista && <div className="text-xs text-zinc-400 mt-2 flex items-center gap-1"><Calendar className="h-3 w-3" /> Prevista: {formatDate(os.dataPrevista)}</div>}
               {os.funcionario && <div className="text-xs text-zinc-400 mt-1 flex items-center gap-1"><User className="h-3 w-3" /> {os.funcionario}</div>}
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader><CardTitle className="text-base">Pagamento</CardTitle></CardHeader>
+            <CardContent className="space-y-3">
+              <div className="space-y-1 text-sm">
+                <div className="flex justify-between"><span className="text-zinc-400">Total:</span><span className="text-zinc-200">{formatCurrency(os.valorTotal)}</span></div>
+                <div className="flex justify-between"><span className="text-zinc-400">Recebido:</span><span className="text-emerald-400">{formatCurrency(os.valorEntrada)}</span></div>
+                <div className="flex justify-between font-bold border-t border-zinc-800 pt-1 mt-1">
+                  <span className="text-zinc-300">Saldo:</span>
+                  <span className={os.valorSaldo > 0.01 ? "text-amber-400" : "text-emerald-400"}>{formatCurrency(os.valorSaldo)}</span>
+                </div>
+              </div>
+              {(os.status === "CONCLUIDO" || os.status === "ENTREGUE") && os.valorSaldo > 0.01 && (
+                <ReceberPagamento
+                  osId={os.id}
+                  numero={os.numero}
+                  valorSaldo={os.valorSaldo}
+                  valorEntrada={os.valorEntrada}
+                  valorTotal={os.valorTotal}
+                  formasPagamento={FORMAS_PAGAMENTO}
+                />
+              )}
+              {os.valorSaldo <= 0.01 && os.valorEntrada > 0 && (
+                <div className="text-xs text-emerald-400 font-semibold pt-1">✓ Totalmente pago</div>
+              )}
             </CardContent>
           </Card>
 
