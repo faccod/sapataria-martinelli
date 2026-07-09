@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { isAuthenticated } from "@/lib/auth";
 
-const TIPOS_VALIDOS = ["SERVICO", "TIPO_ITEM", "TIPO_PRODUTO"];
+const TIPOS_VALIDOS = ["SERVICO", "TIPO_ITEM", "TIPO_PRODUTO", "CAT_ENTRADA_FIN", "CAT_SAIDA_FIN"];
 
 export async function GET(req: Request) {
   if (!isAuthenticated()) return NextResponse.json({ error: "Nao autorizado" }, { status: 401 });

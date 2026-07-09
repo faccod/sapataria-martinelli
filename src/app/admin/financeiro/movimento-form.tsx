@@ -1,30 +1,80 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useEffect, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { ArrowLeft, Save } from "lucide-react";
+import { ArrowLeft, Save, Plus, Check, X, Loader2 } from "lucide-react";
 import Link from "next/link";
 
-const CATS_ENTRADA = ["SERVICO_OS", "VENDA_PRODUTO", "SINAL_OS", "OUTROS"];
-const CATS_SAIDA = ["MATERIAL", "ALUGUEL", "LUZ", "AGUA", "INTERNET", "CONTADOR", "IMPOSTO", "SALARIO", "FORNECEDOR", "MARKETING", "MANUTENCAO", "OUTROS"];
+const CATS_ENTRADA_DEFAULT = ["SERVICO_OS", "VENDA_PRODUTO", "SINAL_OS", "OUTROS"];
+const CATS_SAIDA_DEFAULT = ["MATERIAL", "ALUGUEL", "LUZ", "AGUA", "INTERNET", "CONTADOR", "IMPOSTO", "SALARIO", "FORNECEDOR", "MARKETING", "MANUTENCAO", "OUTROS"];
 
 export function MovimentoForm() {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState("");
+
+  // categorias dinamicas
+  const [catsEntrada, setCatsEntrada] = useState<string[]>(CATS_ENTRADA_DEFAULT);
+  const [catsSaida, setCatsSaida] = useState<string[]>(CATS_SAIDA_DEFAULT);
+
   const [tipo, setTipo] = useState<"ENTRADA" | "SAIDA">("SAIDA");
-  const [categoria, setCategoria] = useState(CATS_SAIDA[0]);
+  const [categoria, setCategoria] = useState(CATS_SAIDA_DEFAULT[0]);
   const [descricao, setDescricao] = useState("");
   const [valor, setValor] = useState(0);
   const [data, setData] = useState(new Date().toISOString().split("T")[0]);
   const [observacoes, setObservacoes] = useState("");
 
+  // inline-add state
+  const [addingCat, setAddingCat] = useState(false);
+  const [newCatNome, setNewCatNome] = useState("");
+  const [savingCat, setSavingCat] = useState(false);
+
+  useEffect(() => {
+    Promise.all([
+      fetch("/admin/api/listas?tipo=CAT_ENTRADA_FIN").then(r => r.json()).then(d => Array.isArray(d) ? d.map((x: any) => x.nome) : []),
+      fetch("/admin/api/listas?tipo=CAT_SAIDA_FIN").then(r => r.json()).then(d => Array.isArray(d) ? d.map((x: any) => x.nome) : []),
+    ]).then(([ent, sai]) => {
+      // só sobrescreve se vier pelo menos 1 item cadastrado
+      if (ent.length > 0) setCatsEntrada(ent);
+      if (sai.length > 0) setCatsSaida(sai);
+    }).catch(() => {});
+  }, []);
+
   function changeTipo(t: "ENTRADA" | "SAIDA") {
     setTipo(t);
-    setCategoria((t === "ENTRADA" ? CATS_ENTRADA : CATS_SAIDA)[0]);
+    const lista = t === "ENTRADA" ? catsEntrada : catsSaida;
+    setCategoria(lista[0] ?? "");
+    setAddingCat(false);
+    setNewCatNome("");
+  }
+
+  async function saveNewCategoria() {
+    if (!newCatNome.trim()) return;
+    setSavingCat(true);
+    try {
+      const tipoCat = tipo === "ENTRADA" ? "CAT_ENTRADA_FIN" : "CAT_SAIDA_FIN";
+      const r = await fetch("/admin/api/listas", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ tipo: tipoCat, nome: newCatNome.trim() }),
+      });
+      if (!r.ok) {
+        const j = await r.json().catch(() => ({}));
+        alert(j.error || "Erro ao criar categoria");
+        return;
+      }
+      const c = await r.json();
+      const setter = tipo === "ENTRADA" ? setCatsEntrada : setCatsSaida;
+      setter((prev) => (prev.includes(c.nome) ? prev : [...prev, c.nome]));
+      setCategoria(c.nome);
+      setAddingCat(false);
+      setNewCatNome("");
+    } finally {
+      setSavingCat(false);
+    }
   }
 
   async function submit(e: React.FormEvent) {
@@ -40,8 +90,8 @@ export function MovimentoForm() {
     });
   }
 
-  const cats = tipo === "ENTRADA" ? CATS_ENTRADA : CATS_SAIDA;
-  const selectCls = "w-full h-10 rounded-md border border-zinc-700 bg-zinc-900 px-3 text-sm text-zinc-100";
+  const cats = tipo === "ENTRADA" ? catsEntrada : catsSaida;
+  const selectCls = "h-10 rounded-md border border-zinc-700 bg-zinc-900 px-3 text-sm text-zinc-100 flex-1";
 
   return (
     <form onSubmit={submit} className="space-y-4 max-w-2xl">
@@ -58,9 +108,36 @@ export function MovimentoForm() {
         </div>
         <div>
           <label className="text-sm font-medium text-zinc-300 mb-1 block">Categoria *</label>
-          <select className={selectCls} value={categoria} onChange={(e) => setCategoria(e.target.value)}>
-            {cats.map((c) => <option key={c} value={c}>{c}</option>)}
-          </select>
+          {!addingCat ? (
+            <div className="flex gap-1">
+              <select className={selectCls} value={categoria} onChange={(e) => setCategoria(e.target.value)}>
+                {cats.map((c) => <option key={c} value={c}>{c}</option>)}
+              </select>
+              <Button type="button" size="icon" variant="outline" onClick={() => setAddingCat(true)} title="Cadastrar nova categoria">
+                <Plus className="h-4 w-4" />
+              </Button>
+            </div>
+          ) : (
+            <div className="flex gap-1">
+              <Input
+                autoFocus
+                value={newCatNome}
+                onChange={(e) => setNewCatNome(e.target.value)}
+                placeholder="Nova categoria..."
+                className="h-10"
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") { e.preventDefault(); saveNewCategoria(); }
+                  if (e.key === "Escape") { setAddingCat(false); setNewCatNome(""); }
+                }}
+              />
+              <Button type="button" size="icon" variant="default" onClick={saveNewCategoria} disabled={savingCat || !newCatNome.trim()} title="Salvar">
+                {savingCat ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4" />}
+              </Button>
+              <Button type="button" size="icon" variant="ghost" onClick={() => { setAddingCat(false); setNewCatNome(""); }} title="Cancelar">
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
+          )}
         </div>
       </div>
       <div>

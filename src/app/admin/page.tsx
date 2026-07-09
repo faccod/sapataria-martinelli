@@ -15,7 +15,7 @@ export default async function AdminDashboardPage() {
   const vinteDiasAtras = new Date();
   vinteDiasAtras.setDate(vinteDiasAtras.getDate() - 20);
 
-  const [emAndamento, concluidas, atrasadas, totalClientes, lembrete20dias, ultimasOS, materiaisBaixos, finMes, vendasMes, totalEstoqueProdutos, templates] = await Promise.all([
+  const [emAndamento, concluidas, atrasadas, totalClientes, lembrete20dias, ultimasOS, materiaisBaixos, finMovEnt, finMovSai, finOS, totalEstoqueProdutos, templates] = await Promise.all([
     prisma.oS.count({ where: { status: { in: ["RECEBIDO","EM_ANALISE","AGUARDANDO_APROVACAO","EM_EXECUCAO"] } } }),
     prisma.oS.count({ where: { status: "CONCLUIDO" } }),
     prisma.oS.findMany({
@@ -33,13 +33,27 @@ export default async function AdminDashboardPage() {
     prisma.material.findMany(),
     prisma.movimento.aggregate({ where: { tipo: "ENTRADA", data: { gte: inicioMes } }, _sum: { valor: true } }),
     prisma.movimento.aggregate({ where: { tipo: "SAIDA", data: { gte: inicioMes } }, _sum: { valor: true } }),
+    // Faturamento = OS concluidas/entregues no mes (usa dataEntrega; cai pra updatedAt se ainda nao foi entregue)
+    prisma.oS.aggregate({
+      where: {
+        status: { in: ["CONCLUIDO", "ENTREGUE"] },
+        OR: [
+          { dataEntrega: { gte: inicioMes } },
+          { AND: [{ dataEntrega: null }, { updatedAt: { gte: inicioMes } }] },
+        ],
+      },
+      _sum: { valorTotal: true },
+    }),
     prisma.produto.aggregate({ _sum: { estoque: true } }),
     prisma.config.findMany({ where: { chave: { in: ["msg_lembrete_20"] } } }),
   ]);
 
   const msgLembrete = templates[0]?.valor ?? "Ola {nome}, voce tem uma OS #{numero} pronta ha 20 dias. Passou aqui pra retirar?";
-  const entradasMes = finMes._sum.valor ?? 0;
-  const saidasMes = vendasMes._sum.valor ?? 0;
+  // Entradas = OS finalizadas no mes + lancamentos manuais do tipo ENTRADA
+  const entradasOSMes = finOS._sum.valorTotal ?? 0;
+  const entradasMovMes = finMovEnt._sum.valor ?? 0;
+  const entradasMes = entradasOSMes + entradasMovMes;
+  const saidasMes = finMovSai._sum.valor ?? 0;
   const saldoMes = entradasMes - saidasMes;
   const materiaisBaixosCount = materiaisBaixos.filter(m => m.estoqueMin > 0 && m.quantidade < m.estoqueMin).length;
 
