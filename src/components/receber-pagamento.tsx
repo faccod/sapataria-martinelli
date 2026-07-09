@@ -57,8 +57,8 @@ export function ReceberPagamento({ osId, numero, valorSaldo, valorEntrada, valor
       </Button>
 
       {open && (
-        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4" onClick={() => !loading && setOpen(false)}>
-          <div className="bg-zinc-900 border border-ouro-700/40 rounded-xl max-w-md w-full p-6 shadow-2xl" onClick={(e) => e.stopPropagation()}>
+        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-start sm:items-center justify-center p-3 sm:p-4 overflow-y-auto" onClick={() => !loading && setOpen(false)}>
+          <div className="bg-zinc-900 border border-ouro-700/40 rounded-xl max-w-md w-full p-5 sm:p-6 shadow-2xl my-4 sm:my-0" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-xl font-bold text-white">
                 Receber pagamento OS-{String(numero).padStart(3, "0")}
