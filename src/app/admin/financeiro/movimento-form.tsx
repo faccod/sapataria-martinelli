@@ -11,7 +11,17 @@ import Link from "next/link";
 const CATS_ENTRADA_DEFAULT = ["SERVICO_OS", "VENDA_PRODUTO", "SINAL_OS", "OUTROS"];
 const CATS_SAIDA_DEFAULT = ["MATERIAL", "ALUGUEL", "LUZ", "AGUA", "INTERNET", "CONTADOR", "IMPOSTO", "SALARIO", "FORNECEDOR", "MARKETING", "MANUTENCAO", "OUTROS"];
 
-export function MovimentoForm() {
+type Initial = {
+  id?: string;
+  tipo?: "ENTRADA" | "SAIDA";
+  categoria?: string;
+  descricao?: string;
+  valor?: number;
+  data?: string;
+  observacoes?: string | null;
+};
+
+export function MovimentoForm({ initial, mode }: { initial?: Initial; mode?: "create" | "edit" }) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState("");
@@ -20,12 +30,12 @@ export function MovimentoForm() {
   const [catsEntrada, setCatsEntrada] = useState<string[]>(CATS_ENTRADA_DEFAULT);
   const [catsSaida, setCatsSaida] = useState<string[]>(CATS_SAIDA_DEFAULT);
 
-  const [tipo, setTipo] = useState<"ENTRADA" | "SAIDA">("SAIDA");
-  const [categoria, setCategoria] = useState(CATS_SAIDA_DEFAULT[0]);
-  const [descricao, setDescricao] = useState("");
-  const [valor, setValor] = useState(0);
-  const [data, setData] = useState(new Date().toISOString().split("T")[0]);
-  const [observacoes, setObservacoes] = useState("");
+  const [tipo, setTipo] = useState<"ENTRADA" | "SAIDA">(initial?.tipo ?? "SAIDA");
+  const [categoria, setCategoria] = useState(initial?.categoria ?? (initial?.tipo === "ENTRADA" ? CATS_ENTRADA_DEFAULT[0] : CATS_SAIDA_DEFAULT[0]));
+  const [descricao, setDescricao] = useState(initial?.descricao ?? "");
+  const [valor, setValor] = useState(initial?.valor ?? 0);
+  const [data, setData] = useState(initial?.data ?? new Date().toISOString().split("T")[0]);
+  const [observacoes, setObservacoes] = useState(initial?.observacoes ?? "");
 
   // inline-add state
   const [addingCat, setAddingCat] = useState(false);
@@ -81,9 +91,11 @@ export function MovimentoForm() {
 
   async function submit(e: React.FormEvent) {
     e.preventDefault(); setError("");
+    const isEdit = mode === "edit" && initial?.id;
     startTransition(async () => {
-      const res = await fetch("/admin/api/financeiro", {
-        method: "POST",
+      const url = isEdit ? `/admin/api/financeiro/${initial!.id}` : "/admin/api/financeiro";
+      const res = await fetch(url, {
+        method: isEdit ? "PUT" : "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ tipo, categoria, descricao, valor: Number(valor), data, observacoes }),
       });

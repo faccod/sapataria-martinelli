@@ -1,14 +1,22 @@
 import Link from "next/link";
+import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Plus, TrendingUp, TrendingDown, DollarSign, Calendar, ArrowUp, ArrowDown } from "lucide-react";
+import { Plus, Pencil, Trash2, ArrowUp, ArrowDown, DollarSign } from "lucide-react";
 import { formatCurrency, formatDate } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
 
 const CATS_ENTRADA = ["SERVICO_OS", "VENDA_PRODUTO", "SINAL_OS", "OUTROS"];
 const CATS_SAIDA = ["MATERIAL", "ALUGUEL", "LUZ", "AGUA", "INTERNET", "CONTADOR", "IMPOSTO", "SALARIO", "FORNECEDOR", "MARKETING", "MANUTENCAO", "OUTROS"];
+
+async function deletarMovimento(formData: FormData) {
+  "use server";
+  const id = formData.get("id") as string;
+  await prisma.movimento.delete({ where: { id } }).catch(() => null);
+  revalidatePath("/admin/financeiro");
+}
 
 export default async function FinanceiroPage({ searchParams }: { searchParams: { de?: string; ate?: string } }) {
   const hoje = new Date();
@@ -122,6 +130,27 @@ export default async function FinanceiroPage({ searchParams }: { searchParams: {
                 </div>
                 <div className="text-xs text-zinc-400 mt-1">{m.categoria}</div>
                 {m.descricao && <div className="text-sm text-zinc-300 mt-1 line-clamp-2">{m.descricao}</div>}
+                <div className="flex items-center gap-1 mt-3 pt-3 border-t border-zinc-800">
+                  <Button asChild variant="outline" size="sm" className="flex-1 text-zinc-300">
+                    <Link href={`/admin/financeiro/${m.id}/editar`}><Pencil className="h-3.5 w-3.5 mr-1" /> Editar</Link>
+                  </Button>
+                  <form action={deletarMovimento} className="flex-1">
+                    <input type="hidden" name="id" value={m.id} />
+                    <Button
+                      type="submit"
+                      variant="outline"
+                      size="sm"
+                      className="w-full text-red-400 border-red-900/50 hover:bg-red-950/30 hover:text-red-300"
+                      onClick={(e) => {
+                        if (!confirm(`Excluir o lancamento "${m.descricao}" de ${formatCurrency(m.valor)}?`)) {
+                          e.preventDefault();
+                        }
+                      }}
+                    >
+                      <Trash2 className="h-3.5 w-3.5 mr-1" /> Excluir
+                    </Button>
+                  </form>
+                </div>
               </div>
             ))}
           </div>
@@ -136,16 +165,41 @@ export default async function FinanceiroPage({ searchParams }: { searchParams: {
                   <th className="px-4 py-3 font-semibold">Categoria</th>
                   <th className="px-4 py-3 font-semibold">Descricao</th>
                   <th className="px-4 py-3 font-semibold text-right">Valor</th>
+                  <th className="px-4 py-3 font-semibold text-right">Acoes</th>
                 </tr>
               </thead>
               <tbody>
                 {movs.map((m) => (
-                  <tr key={`row-${m.id}`} className="border-b border-zinc-800/50 last:border-0">
+                  <tr key={`row-${m.id}`} className="border-b border-zinc-800/50 last:border-0 hover:bg-zinc-900/50">
                     <td className="px-4 py-3 text-zinc-400 text-sm">{formatDate(m.data)}</td>
                     <td className="px-4 py-3"><span className={`px-2 py-0.5 rounded text-xs font-semibold ${m.tipo === "ENTRADA" ? "bg-emerald-600/20 text-emerald-400" : "bg-red-600/20 text-red-400"}`}>{m.tipo}</span></td>
                     <td className="px-4 py-3 text-zinc-300 text-sm">{m.categoria}</td>
                     <td className="px-4 py-3 text-zinc-300 text-sm">{m.descricao}</td>
                     <td className={`px-4 py-3 text-right font-bold ${m.tipo === "ENTRADA" ? "text-emerald-400" : "text-red-400"}`}>{m.tipo === "ENTRADA" ? "+" : "-"}{formatCurrency(m.valor)}</td>
+                    <td className="px-4 py-3">
+                      <div className="flex items-center justify-end gap-1">
+                        <Button asChild variant="ghost" size="icon" title="Editar" className="text-zinc-400 hover:text-ouro-400">
+                          <Link href={`/admin/financeiro/${m.id}/editar`}><Pencil className="h-4 w-4" /></Link>
+                        </Button>
+                        <form action={deletarMovimento}>
+                          <input type="hidden" name="id" value={m.id} />
+                          <Button
+                            type="submit"
+                            variant="ghost"
+                            size="icon"
+                            title="Excluir"
+                            className="text-red-400 hover:text-red-300 hover:bg-red-950/30"
+                            onClick={(e) => {
+                              if (!confirm(`Excluir o lancamento "${m.descricao}"?`)) {
+                                e.preventDefault();
+                              }
+                            }}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </form>
+                      </div>
+                    </td>
                   </tr>
                 ))}
               </tbody>
