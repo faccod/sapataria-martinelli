@@ -37,9 +37,10 @@ export function MovimentoForm() {
       fetch("/admin/api/listas?tipo=CAT_ENTRADA_FIN").then(r => r.json()).then(d => Array.isArray(d) ? d.map((x: any) => x.nome) : []),
       fetch("/admin/api/listas?tipo=CAT_SAIDA_FIN").then(r => r.json()).then(d => Array.isArray(d) ? d.map((x: any) => x.nome) : []),
     ]).then(([ent, sai]) => {
-      // só sobrescreve se vier pelo menos 1 item cadastrado
-      if (ent.length > 0) setCatsEntrada(ent);
-      if (sai.length > 0) setCatsSaida(sai);
+      // MERGE: defaults + cadastradas no banco (sem duplicar)
+      // Novas cadastradas ficam no INICIO da lista
+      setCatsEntrada(Array.from(new Set([...ent, ...CATS_ENTRADA_DEFAULT])));
+      setCatsSaida(Array.from(new Set([...sai, ...CATS_SAIDA_DEFAULT])));
     }).catch(() => {});
   }, []);
 
@@ -68,7 +69,8 @@ export function MovimentoForm() {
       }
       const c = await r.json();
       const setter = tipo === "ENTRADA" ? setCatsEntrada : setCatsSaida;
-      setter((prev) => (prev.includes(c.nome) ? prev : [...prev, c.nome]));
+      // tira duplicata se ja existir, e poe a categoria nova no INICIO
+      setter((prev) => Array.from(new Set([c.nome, ...prev.filter((x) => x !== c.nome)])));
       setCategoria(c.nome);
       setAddingCat(false);
       setNewCatNome("");
