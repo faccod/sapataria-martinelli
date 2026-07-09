@@ -3,7 +3,8 @@ import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Plus, Pencil, Trash2, ArrowUp, ArrowDown, DollarSign } from "lucide-react";
+import { BotaoExcluirMovimento } from "@/components/botao-excluir-movimento";
+import { Plus, Pencil, ArrowUp, ArrowDown, DollarSign } from "lucide-react";
 import { formatCurrency, formatDate } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
@@ -27,12 +28,21 @@ export default async function FinanceiroPage({ searchParams }: { searchParams: {
   const ate = searchParams.ate ?? fimMes.toISOString().split("T")[0];
 
   const where: any = { data: { gte: new Date(de), lte: new Date(ate + "T23:59:59") } };
-  const [movs, totalEntradas, totalSaidas, porCategoria] = await Promise.all([
+  const [movs, totalEntradas, totalSaidas] = await Promise.all([
     prisma.movimento.findMany({ where, orderBy: { data: "desc" } }),
     prisma.movimento.aggregate({ where: { ...where, tipo: "ENTRADA" }, _sum: { valor: true } }),
     prisma.movimento.aggregate({ where: { ...where, tipo: "SAIDA" }, _sum: { valor: true } }),
-    prisma.movimento.groupBy({ by: ["categoria", "tipo"], where, _sum: { valor: true } }),
   ]);
+
+  // groupBy em JS (evita incompatibilidade do Prisma groupBy + libSQL adapter)
+  const porCategoriaMap = new Map<string, { categoria: string; tipo: string; _sum: { valor: number } }>();
+  for (const m of movs) {
+    const key = `${m.categoria}|${m.tipo}`;
+    const cur = porCategoriaMap.get(key);
+    if (cur) cur._sum.valor += m.valor;
+    else porCategoriaMap.set(key, { categoria: m.categoria, tipo: m.tipo, _sum: { valor: m.valor } });
+  }
+  const porCategoria = Array.from(porCategoriaMap.values());
 
   const saldo = (totalEntradas._sum.valor ?? 0) - (totalSaidas._sum.valor ?? 0);
 
@@ -136,19 +146,14 @@ export default async function FinanceiroPage({ searchParams }: { searchParams: {
                   </Button>
                   <form action={deletarMovimento} className="flex-1">
                     <input type="hidden" name="id" value={m.id} />
-                    <Button
-                      type="submit"
-                      variant="outline"
-                      size="sm"
-                      className="w-full text-red-400 border-red-900/50 hover:bg-red-950/30 hover:text-red-300"
-                      onClick={(e) => {
-                        if (!confirm(`Excluir o lancamento "${m.descricao}" de ${formatCurrency(m.valor)}?`)) {
-                          e.preventDefault();
-                        }
-                      }}
-                    >
-                      <Trash2 className="h-3.5 w-3.5 mr-1" /> Excluir
-                    </Button>
+                    <BotaoExcluirMovimento
+                      id={m.id}
+                      descricao={m.descricao}
+                      valor={m.valor}
+                      variant="sm"
+                      label="Excluir"
+                      className="w-full text-red-400 border border-red-900/50 hover:bg-red-950/30 hover:text-red-300"
+                    />
                   </form>
                 </div>
               </div>
@@ -183,20 +188,7 @@ export default async function FinanceiroPage({ searchParams }: { searchParams: {
                         </Button>
                         <form action={deletarMovimento}>
                           <input type="hidden" name="id" value={m.id} />
-                          <Button
-                            type="submit"
-                            variant="ghost"
-                            size="icon"
-                            title="Excluir"
-                            className="text-red-400 hover:text-red-300 hover:bg-red-950/30"
-                            onClick={(e) => {
-                              if (!confirm(`Excluir o lancamento "${m.descricao}"?`)) {
-                                e.preventDefault();
-                              }
-                            }}
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
+                          <BotaoExcluirMovimento id={m.id} descricao={m.descricao} valor={m.valor} />
                         </form>
                       </div>
                     </td>
