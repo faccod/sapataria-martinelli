@@ -21,17 +21,19 @@ export async function POST(req: Request, { params }: { params: { id: string } })
   }
 
   const novaEntrada = os.valorEntrada + valor;
-  const novoSaldo = os.valorTotal - novaEntrada;
+  const novoSaldo = Math.max(0, os.valorTotal - novaEntrada);
+  const pagoTudo = novoSaldo <= 0.01;
 
-  // Cria Movimento de ENTRADA e atualiza a OS em transacao
-  const [mov] = await prisma.$transaction([
+  // Cria Movimento de ENTRADA, atualiza a OS e (se pago tudo) marca como ENTREGUE em transacao
+  const ops: any[] = [
     prisma.movimento.create({
       data: {
         tipo: "ENTRADA",
         categoria: "SERVICO_OS",
-        descricao: `Recebimento OS-${String(os.numero).padStart(3, "0")} - ${os.clienteId ? "" : ""}${forma}`,
+        descricao: `Recebimento OS-${String(os.numero).padStart(3, "0")} (${forma})`,
         valor,
         osId: os.id,
+        observacoes,
       },
     }),
     prisma.oS.update({
@@ -41,12 +43,28 @@ export async function POST(req: Request, { params }: { params: { id: string } })
         valorSaldo: novoSaldo,
       },
     }),
-  ]);
+  ];
+
+  // Se pagou tudo, muda status pra ENTREGUE e registra dataEntrega + StatusLog
+  if (pagoTudo) {
+    ops.push(
+      prisma.oS.update({
+        where: { id: os.id },
+        data: {
+          status: "ENTREGUE",
+          dataEntrega: new Date(),
+          statusLogs: { create: { status: "ENTREGUE", nota: `Pagamento total registrado via API (${forma})` } },
+        },
+      }),
+    );
+  }
+
+  await prisma.$transaction(ops);
 
   revalidatePath("/admin");
   revalidatePath("/admin/financeiro");
   revalidatePath(`/admin/os/${os.id}`);
   revalidatePath("/admin/os");
 
-  return NextResponse.json({ ok: true, movimento: mov, valorEntrada: novaEntrada, valorSaldo: novoSaldo });
+  return NextResponse.json({ ok: true, valorEntrada: novaEntrada, valorSaldo: novoSaldo, pagoTudo, novoStatus: pagoTudo ? "ENTREGUE" : os.status });
 }

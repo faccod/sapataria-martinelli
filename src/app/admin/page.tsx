@@ -15,7 +15,7 @@ export default async function AdminDashboardPage() {
   const vinteDiasAtras = new Date();
   vinteDiasAtras.setDate(vinteDiasAtras.getDate() - 20);
 
-  const [emAndamento, concluidas, atrasadas, totalClientes, lembrete20dias, ultimasOS, materiaisBaixos, finMovEnt, finMovSai, finOSEntregue, finOSConcluido, totalEstoqueProdutos, templates] = await Promise.all([
+  const [emAndamento, concluidas, atrasadas, totalClientes, lembrete20dias, ultimasOS, materiaisBaixos, finMovEnt, finMovSai, totalEstoqueProdutos, templates] = await Promise.all([
     prisma.oS.count({ where: { status: { in: ["RECEBIDO","EM_ANALISE","AGUARDANDO_APROVACAO","EM_EXECUCAO"] } } }),
     prisma.oS.count({ where: { status: "CONCLUIDO" } }),
     prisma.oS.findMany({
@@ -31,20 +31,15 @@ export default async function AdminDashboardPage() {
     }),
     prisma.oS.findMany({ orderBy: { createdAt: "desc" }, take: 5, include: { cliente: true } }),
     prisma.material.findMany(),
+    // Receita do mes = SOMA DOS PAGAMENTOS RECEBIDOS (Movimento ENTRADA) — nao conta OS finalizada sem pagar
     prisma.movimento.aggregate({ where: { tipo: "ENTRADA", data: { gte: inicioMes } }, _sum: { valor: true } }),
     prisma.movimento.aggregate({ where: { tipo: "SAIDA", data: { gte: inicioMes } }, _sum: { valor: true } }),
-    // Faturamento = OS ENTREGUES (data de entrega no mes) + OS CONCLUIDAS (sem entrega ainda, usa updatedAt)
-    prisma.oS.aggregate({ where: { status: "ENTREGUE", dataEntrega: { gte: inicioMes } }, _sum: { valorTotal: true } }),
-    prisma.oS.aggregate({ where: { status: "CONCLUIDO", dataEntrega: null, updatedAt: { gte: inicioMes } }, _sum: { valorTotal: true } }),
     prisma.produto.aggregate({ _sum: { estoque: true } }),
     prisma.config.findMany({ where: { chave: { in: ["msg_lembrete_20"] } } }),
   ]);
 
   const msgLembrete = templates[0]?.valor ?? "Ola {nome}, voce tem uma OS #{numero} pronta ha 20 dias. Passou aqui pra retirar?";
-  // Entradas = OS finalizadas no mes + lancamentos manuais do tipo ENTRADA
-  const entradasOSMes = (finOSEntregue._sum.valorTotal ?? 0) + (finOSConcluido._sum.valorTotal ?? 0);
-  const entradasMovMes = finMovEnt._sum.valor ?? 0;
-  const entradasMes = entradasOSMes + entradasMovMes;
+  const entradasMes = finMovEnt._sum.valor ?? 0;
   const saidasMes = finMovSai._sum.valor ?? 0;
   const saldoMes = entradasMes - saidasMes;
   const materiaisBaixosCount = materiaisBaixos.filter(m => m.estoqueMin > 0 && m.quantidade < m.estoqueMin).length;
@@ -77,12 +72,12 @@ export default async function AdminDashboardPage() {
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">Faturamento do mes</CardTitle>
+            <CardTitle className="text-sm font-medium">Receita do mes</CardTitle>
             <ArrowUp className="h-4 w-4 text-emerald-400" />
           </CardHeader>
           <CardContent>
             <div className="text-3xl font-bold text-emerald-400">{formatCurrency(entradasMes)}</div>
-            <CardDescription>Entradas no caixa</CardDescription>
+            <CardDescription>Pagamentos recebidos</CardDescription>
           </CardContent>
         </Card>
         <Card>

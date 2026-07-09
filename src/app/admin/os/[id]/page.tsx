@@ -170,7 +170,7 @@ export default async function OsDetailPage({ params }: { params: { id: string } 
                   <span className={os.valorSaldo > 0.01 ? "text-amber-400" : "text-emerald-400"}>{formatCurrency(os.valorSaldo)}</span>
                 </div>
               </div>
-              {(os.status === "CONCLUIDO" || os.status === "ENTREGUE") && os.valorSaldo > 0.01 && (
+              {os.status === "CONCLUIDO" && os.valorSaldo > 0.01 && (
                 <ReceberPagamento
                   osId={os.id}
                   numero={os.numero}
@@ -180,8 +180,8 @@ export default async function OsDetailPage({ params }: { params: { id: string } 
                   formasPagamento={FORMAS_PAGAMENTO}
                 />
               )}
-              {os.valorSaldo <= 0.01 && os.valorEntrada > 0 && (
-                <div className="text-xs text-emerald-400 font-semibold pt-1">✓ Totalmente pago</div>
+              {os.status === "ENTREGUE" && (
+                <div className="text-xs text-emerald-400 font-semibold pt-1">✓ Entregue e pago</div>
               )}
             </CardContent>
           </Card>

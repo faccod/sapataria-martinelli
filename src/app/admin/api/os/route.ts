@@ -32,7 +32,9 @@ export async function POST(req: Request) {
   const valorTotal = body.itens.reduce((s: number, i: any) => s + (Number(i.valor) || 0), 0);
   const valorEntrada = Number(body.valorEntrada) || 0;
   const valorSaldo = valorTotal - valorEntrada;
+  const forma = body.formaPagamento || "DINHEIRO";
 
+  // Cria a OS primeiro (precisamos do id dela)
   const os = await prisma.oS.create({
     data: {
       numero,
@@ -41,12 +43,26 @@ export async function POST(req: Request) {
       funcionario: body.funcionario || null,
       clienteId: body.clienteId,
       valorTotal, valorEntrada, valorSaldo,
-      formaPagamento: body.formaPagamento || null,
+      formaPagamento: forma,
       observacoes: body.observacoes || null,
       itens: { create: body.itens },
       statusLogs: { create: { status: body.status || "RECEBIDO", nota: "OS criada" } },
     },
-    include: { cliente: true, itens: true },
   });
+
+  // Se tiver sinal/Entrada > 0, cria Movimento SINAL vinculado a OS
+  if (valorEntrada > 0) {
+    await prisma.movimento.create({
+      data: {
+        tipo: "ENTRADA",
+        categoria: "SINAL_OS",
+        descricao: `Sinal OS-${String(numero).padStart(3, "0")} (${forma})`,
+        valor: valorEntrada,
+        osId: os.id,
+        observacoes: body.observacoes || null,
+      },
+    });
+  }
+
   return NextResponse.json(os);
 }
