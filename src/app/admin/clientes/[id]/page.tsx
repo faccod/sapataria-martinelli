@@ -3,10 +3,10 @@ import { prisma } from "@/lib/prisma";
 import { ClienteForm } from "../cliente-form";
 import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { statusInfo } from "@/lib/constants";
 import { formatCurrency, formatDate } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
-import { Hammer } from "lucide-react";
+import { ArrowLeft, Hammer, Pencil } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 
@@ -27,8 +27,23 @@ export default async function Page({ params }: { params: { id: string } }) {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-3xl font-bold text-white mb-1">{cliente.nome}</h1>
-        <p className="text-zinc-400">Cliente desde {formatDate(cliente.createdAt)}</p>
+        <Button asChild variant="ghost" size="sm" className="text-zinc-400 hover:text-ouro-400 -ml-3 mb-2">
+          <Link href="/admin/clientes">
+            <ArrowLeft className="h-4 w-4 mr-1" /> Voltar para lista
+          </Link>
+        </Button>
+        <div className="flex items-start justify-between gap-3 flex-wrap">
+          <div>
+            <h1 className="text-3xl font-bold text-white mb-1 flex items-center gap-2">
+              <Pencil className="h-6 w-6 text-ouro-400" /> Editar cliente
+            </h1>
+            <p className="text-zinc-400">
+              <span className="text-white font-semibold">{cliente.nome}</span>
+              <span className="mx-2 text-zinc-600">|</span>
+              Cliente desde {formatDate(cliente.createdAt)}
+            </p>
+          </div>
+        </div>
       </div>
 
       <div className="grid lg:grid-cols-3 gap-6">
@@ -43,8 +58,14 @@ export default async function Page({ params }: { params: { id: string } }) {
               <CardTitle className="text-base">Resumo</CardTitle>
             </CardHeader>
             <CardContent className="space-y-2 text-sm">
-              <div className="flex justify-between"><span className="text-zinc-400">Total de OS:</span><span className="text-white font-semibold">{cliente.ordens.length}</span></div>
-              <div className="flex justify-between"><span className="text-zinc-400">Total gasto:</span><span className="text-ouro-400 font-bold">{formatCurrency(totalGasto)}</span></div>
+              <div className="flex justify-between">
+                <span className="text-zinc-400">Total de OS:</span>
+                <span className="text-white font-semibold">{cliente.ordens.length}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-zinc-400">Total gasto:</span>
+                <span className="text-ouro-400 font-bold">{formatCurrency(totalGasto)}</span>
+              </div>
             </CardContent>
           </Card>
         </div>
@@ -63,13 +84,21 @@ export default async function Page({ params }: { params: { id: string } }) {
             {cliente.ordens.map((os) => {
               const s = statusInfo(os.status);
               return (
-                <Link key={os.id} href={`/admin/os/${os.id}`} className="block bg-zinc-900/50 border border-zinc-800 rounded-lg p-4 hover:border-ouro-600/50 transition">
-                  <div className="flex items-center justify-between">
+                <Link
+                  key={os.id}
+                  href={`/admin/os/${os.id}`}
+                  className="block bg-zinc-900/50 border border-zinc-800 rounded-lg p-4 hover:border-ouro-600/50 transition"
+                >
+                  <div className="flex items-center justify-between gap-3 flex-wrap">
                     <div>
-                      <div className="font-semibold text-white">OS-{String(os.numero).padStart(3, "0")}</div>
+                      <div className="font-semibold text-white">
+                        OS-{String(os.numero).padStart(3, "0")}
+                      </div>
                       <div className="text-xs text-zinc-500">{formatDate(os.dataEntrada)}</div>
                     </div>
-                    <div className={`px-2 py-0.5 rounded text-xs font-semibold text-white ${s.cor}`}>{s.label}</div>
+                    <div className={`px-2 py-0.5 rounded text-xs font-semibold text-white ${s.cor}`}>
+                      {s.label}
+                    </div>
                     <div className="text-ouro-400 font-bold">{formatCurrency(os.valorTotal)}</div>
                   </div>
                 </Link>

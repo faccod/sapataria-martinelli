@@ -54,7 +54,13 @@ export function ClienteForm({ cliente }: { cliente?: Cliente }) {
       </Button>
       <div>
         <label className="text-sm font-medium text-zinc-300 mb-1 block">Nome completo *</label>
-        <Input value={nome} onChange={(e) => setNome(e.target.value)} required />
+        <Input
+          value={nome}
+          onChange={(e) => setNome(e.target.value)}
+          required
+          autoFocus
+          placeholder="Ex: Maria da Silva"
+        />
       </div>
       <div className="grid md:grid-cols-2 gap-4">
         <div>
@@ -79,12 +85,22 @@ export function ClienteForm({ cliente }: { cliente?: Cliente }) {
         <Textarea value={observacoes} onChange={(e) => setObservacoes(e.target.value)} rows={3} />
       </div>
       {error && <div className="text-sm text-red-400 bg-red-950/40 border border-red-900 rounded-md p-3">{error}</div>}
-      <div className="flex gap-2">
+      <div className="flex gap-2 flex-wrap">
         <Button type="submit" disabled={isPending}>
-          <Save className="h-4 w-4 mr-2" />{isPending ? "Salvando..." : "Salvar"}
+          <Save className="h-4 w-4 mr-2" />
+          {isPending
+            ? "Salvando..."
+            : cliente
+            ? "Salvar alteracoes"
+            : "Cadastrar cliente"}
+        </Button>
+        <Button asChild type="button" variant="outline">
+          <Link href="/admin/clientes">Cancelar</Link>
         </Button>
         {cliente && (
-          <Button type="button" variant="destructive" onClick={handleDelete}>Excluir</Button>
+          <Button type="button" variant="destructive" onClick={handleDelete} className="sm:ml-auto">
+            Excluir
+          </Button>
         )}
       </div>
     </form>
