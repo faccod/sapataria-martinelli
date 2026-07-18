@@ -1,13 +1,13 @@
 "use client";
 
-import { useEffect, useState, useTransition } from "react";
+import { useEffect, useMemo, useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { ArrowLeft, Save, Plus, Trash2, Check, X, Loader2 } from "lucide-react";
+import { ArrowLeft, Save, Plus, Trash2, Check, X, Loader2, Search, ChevronDown, Phone, MessageCircle } from "lucide-react";
 import Link from "next/link";
-import { FORMAS_PAGAMENTO, STATUS_OS } from "@/lib/constants";
+import { FORMAS_PAGAMENTO, STATUS_OS, whatsappLink } from "@/lib/constants";
 import { formatCurrency } from "@/lib/utils";
 
 type Cliente = { id: string; nome: string; telefone?: string | null; whatsapp?: string | null };
@@ -30,16 +30,6 @@ export function OsForm({ clientes, os }: { clientes: Cliente[]; os?: Os }) {
   // Lista local de clientes (pra incluir novos cadastrados inline)
   const [clientesLocal, setClientesLocal] = useState<Cliente[]>(clientes);
 
-  useEffect(() => {
-    Promise.all([
-      fetch("/admin/api/listas?tipo=SERVICO").then(r => r.json()).then(d => Array.isArray(d) ? d.map((x: any) => x.nome) : []),
-      fetch("/admin/api/listas?tipo=TIPO_ITEM").then(r => r.json()).then(d => Array.isArray(d) ? d.map((x: any) => x.nome) : []),
-    ]).then(([svcs, tipos]) => {
-      setServicos(svcs);
-      setTiposItem(tipos);
-    }).catch(() => {});
-  }, []);
-
   const [clienteId, setClienteId] = useState(os?.clienteId ?? clientes[0]?.id ?? "");
   const [status, setStatus] = useState(os?.status ?? "RECEBIDO");
   const [dataPrevista, setDataPrevista] = useState(os?.dataPrevista?.substring(0, 10) ?? "");
@@ -50,6 +40,53 @@ export function OsForm({ clientes, os }: { clientes: Cliente[]; os?: Os }) {
   const [itens, setItens] = useState<Item[]>(os?.itens ?? [
     { tipoItem: "Sapato", marca: "", cor: "", descricao: "", servico: "Costura de solado", valor: 0 }
   ]);
+
+  // Combobox de cliente (com busca)
+  const [clienteSearch, setClienteSearch] = useState("");
+  const [clienteDropdownOpen, setClienteDropdownOpen] = useState(false);
+  const clienteDropdownRef = useRef<HTMLDivElement>(null);
+
+  const clienteSelecionado = useMemo(
+    () => clientesLocal.find((c) => c.id === clienteId) ?? null,
+    [clientesLocal, clienteId],
+  );
+  const clientesFiltrados = useMemo(() => {
+    const q = clienteSearch.trim().toLowerCase();
+    if (!q) return clientesLocal;
+    return clientesLocal.filter((c) => {
+      const tel = (c.telefone ?? "").toLowerCase();
+      const zap = (c.whatsapp ?? "").toLowerCase();
+      return (
+        c.nome.toLowerCase().includes(q) ||
+        tel.includes(q) ||
+        zap.includes(q)
+      );
+    });
+  }, [clienteSearch, clientesLocal]);
+
+  // Fecha dropdown ao clicar fora
+  useEffect(() => {
+    function onDocClick(e: MouseEvent) {
+      if (!clienteDropdownRef.current) return;
+      if (!clienteDropdownRef.current.contains(e.target as Node)) {
+        setClienteDropdownOpen(false);
+      }
+    }
+    if (clienteDropdownOpen) {
+      document.addEventListener("mousedown", onDocClick);
+      return () => document.removeEventListener("mousedown", onDocClick);
+    }
+  }, [clienteDropdownOpen]);
+
+  useEffect(() => {
+    Promise.all([
+      fetch("/admin/api/listas?tipo=SERVICO").then(r => r.json()).then(d => Array.isArray(d) ? d.map((x: any) => x.nome) : []),
+      fetch("/admin/api/listas?tipo=TIPO_ITEM").then(r => r.json()).then(d => Array.isArray(d) ? d.map((x: any) => x.nome) : []),
+    ]).then(([svcs, tipos]) => {
+      setServicos(svcs);
+      setTiposItem(tipos);
+    }).catch(() => {});
+  }, []);
 
   // ===== Inline-add: Cliente (topo) =====
   const [addClienteOpen, setAddClienteOpen] = useState(false);
@@ -158,6 +195,7 @@ export function OsForm({ clientes, os }: { clientes: Cliente[]; os?: Os }) {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError("");
+    if (!clienteId) { setError("Selecione um cliente."); return; }
     if (itens.length === 0) { setError("Adicione pelo menos 1 item."); return; }
     startTransition(async () => {
       const payload = { clienteId, status, dataPrevista, funcionario, valorEntrada: Number(valorEntrada), formaPagamento, observacoes, itens };
@@ -200,10 +238,106 @@ export function OsForm({ clientes, os }: { clientes: Cliente[]; os?: Os }) {
           <label className="text-sm font-medium text-zinc-300 mb-1 block">Cliente *</label>
           {!addClienteOpen ? (
             <div className="flex gap-1">
-              <select className={`${selectCls} flex-1`} value={clienteId} onChange={(e) => setClienteId(e.target.value)} required>
-                <option value="">Selecione um cliente</option>
-                {clientesLocal.map((c) => <option key={c.id} value={c.id}>{c.nome}</option>)}
-              </select>
+              <div ref={clienteDropdownRef} className="relative flex-1">
+                <button
+                  type="button"
+                  onClick={() => setClienteDropdownOpen((o) => !o)}
+                  className={`${selectCls} flex items-center justify-between gap-2 w-full text-left ${!clienteSelecionado ? "text-zinc-500" : "text-zinc-100"}`}
+                >
+                  <span className="truncate">
+                    {clienteSelecionado ? clienteSelecionado.nome : "Selecione um cliente"}
+                  </span>
+                  <ChevronDown
+                    className={`h-4 w-4 shrink-0 transition-transform ${clienteDropdownOpen ? "rotate-180" : ""}`}
+                  />
+                </button>
+                {clienteDropdownOpen && (
+                  <div className="absolute z-50 top-full left-0 right-0 mt-1 bg-zinc-950 border border-zinc-700 rounded-md shadow-2xl max-h-80 overflow-hidden flex flex-col">
+                    <div className="p-2 border-b border-zinc-800 bg-zinc-950">
+                      <div className="relative">
+                        <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-zinc-500 pointer-events-none" />
+                        <Input
+                          autoFocus
+                          value={clienteSearch}
+                          onChange={(e) => setClienteSearch(e.target.value)}
+                          placeholder="Buscar por nome ou telefone..."
+                          className="h-9 pl-7 text-sm"
+                        />
+                      </div>
+                    </div>
+                    <div className="overflow-y-auto flex-1 overscroll-contain">
+                      {clientesFiltrados.length === 0 ? (
+                        <div className="p-4 text-center text-sm text-zinc-500">
+                          {clienteSearch
+                            ? "Nenhum cliente encontrado"
+                            : "Nenhum cliente cadastrado"}
+                        </div>
+                      ) : (
+                        clientesFiltrados.map((c) => {
+                          const ativo = c.id === clienteId;
+                          return (
+                            <button
+                              key={c.id}
+                              type="button"
+                              onClick={() => {
+                                setClienteId(c.id);
+                                setClienteDropdownOpen(false);
+                                setClienteSearch("");
+                              }}
+                              className={`w-full text-left px-3 py-2.5 border-b border-zinc-800/50 last:border-0 hover:bg-zinc-900 transition ${
+                                ativo ? "bg-ouro-500/10" : ""
+                              }`}
+                            >
+                              <div className="flex items-center justify-between gap-2">
+                                <div className="font-semibold text-white truncate">
+                                  {c.nome}
+                                </div>
+                                {ativo && (
+                                  <Check className="h-4 w-4 text-ouro-400 shrink-0" />
+                                )}
+                              </div>
+                              {(c.telefone || c.whatsapp) && (
+                                <div className="text-xs text-zinc-500 flex items-center gap-3 mt-0.5">
+                                  {c.telefone && (
+                                    <span className="inline-flex items-center gap-1">
+                                      <Phone className="h-3 w-3" /> {c.telefone}
+                                    </span>
+                                  )}
+                                  {(c.whatsapp || c.telefone) && (
+                                    <a
+                                      href={whatsappLink(c.whatsapp || c.telefone)}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      onClick={(e) => e.stopPropagation()}
+                                      className="inline-flex items-center gap-1 text-emerald-400 hover:text-emerald-300"
+                                    >
+                                      <MessageCircle className="h-3 w-3" /> Zap
+                                    </a>
+                                  )}
+                                </div>
+                              )}
+                            </button>
+                          );
+                        })
+                      )}
+                    </div>
+                    <div className="px-3 py-1.5 border-t border-zinc-800 text-xs text-zinc-500 bg-zinc-950 flex justify-between items-center">
+                      <span>
+                        {clientesFiltrados.length} de {clientesLocal.length} cliente(s)
+                      </span>
+                      {clienteSearch && (
+                        <button
+                          type="button"
+                          onClick={() => setClienteSearch("")}
+                          className="text-ouro-400 hover:underline"
+                        >
+                          Limpar
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
               <Button type="button" size="icon" variant="outline" onClick={() => setAddClienteOpen(true)} title="Cadastrar novo cliente">
                 <Plus className="h-4 w-4" />
               </Button>
